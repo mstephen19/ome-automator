@@ -1,4 +1,4 @@
-import { Button, IconButton, List, ListItem, ListItemProps, ListItemText, TextField, Tooltip, styled } from '@mui/material';
+import { Box, Button, IconButton, List, ListItem, ListItemProps, ListItemText, TextField, Tooltip, styled } from '@mui/material';
 import React, { useEffect, useState, useContext, createContext, useRef } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -11,6 +11,10 @@ type Message = {
 
 const MessageSequenceContext = createContext<Message[]>([]);
 
+/**
+ * Retrieves messages from `chrome.storage.local` on initial mount, and
+ * updates state when changes are detected.
+ */
 const MessageSequenceProvider = ({ children }: { children: React.ReactNode }) => {
     const [messages, setMessages] = useState<Message[]>([]);
 
@@ -40,7 +44,6 @@ const MessageSequenceProvider = ({ children }: { children: React.ReactNode }) =>
     return <MessageSequenceContext.Provider value={messages}>{children}</MessageSequenceContext.Provider>;
 };
 
-// ? Is the escaping necessary?
 const sanitize = (str: string) => str.trim();
 
 const MessageListItem = styled(ListItem)({
@@ -76,7 +79,7 @@ const MessageItem = ({ message, ...props }: { message: Message } & ListItemProps
     };
 
     return (
-        <MessageListItem {...props} divider>
+        <MessageListItem {...props}>
             <ListItemText
                 onKeyDown={(e) => {
                     const editedText = (e.target as HTMLSpanElement).textContent || '';
@@ -115,9 +118,20 @@ const Messages = () => {
 
     return (
         <List sx={{ width: '100%' }}>
-            {messages.map((message) => (
-                <MessageItem key={`message-${message.id}`} message={message} />
+            {messages.map((message, index) => (
+                <MessageItem
+                    key={`message-${message.id}`}
+                    message={message}
+                    // Display divider only for the final item
+                    divider={index < messages.length - 1}
+                />
             ))}
+
+            {!messages.length && (
+                <ListItem>
+                    <ListItemText sx={{ textAlign: 'center' }}>Your message sequence is empty.</ListItemText>
+                </ListItem>
+            )}
         </List>
     );
 };
