@@ -24,6 +24,7 @@ const AppContainer = styled(Container)({
 const App = () => {
     return (
         <AppWrapper>
+            {/* todo: Theme switching */}
             <AppBar position='sticky'>
                 <Toolbar>
                     <Typography fontSize='1rem'>Ome Automator</Typography>

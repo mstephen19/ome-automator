@@ -25,7 +25,7 @@ export const Controls = () => {
                 </Tooltip>
             </FlexContainer>
 
-            <FlexContainer sx={{ width: '50%', flexDirection: 'column', gap: '10px' }}>
+            <FlexContainer sx={{ width: '50%', gap: '10px', flexDirection: 'column' }}>
                 <Typography fontSize='1rem' fontStyle='italic'>
                     Elapsed Time:
                 </Typography>

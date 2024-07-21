@@ -1,46 +1,65 @@
-import { Box, Slider, Tooltip, Typography } from '@mui/material';
+import { Box, Slider, TextField, Tooltip, Typography } from '@mui/material';
 import { ComponentProps, useContext } from 'react';
 import { ConfigContext } from './context/ConfigProvider';
 import InfoIcon from '@mui/icons-material/Info';
 
 import { Config } from '../types';
+import { configStore } from '../storage';
 
 const ConfigName = ({ name, tip, value }: { name: string; tip: string; value?: number }) => (
     <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        <Typography>
-            {name}: {value}
-        </Typography>
-
         <Tooltip title={tip} arrow placement='top'>
             <InfoIcon sx={{ fontSize: '1rem', cursor: 'pointer' }} />
         </Tooltip>
+
+        <Typography>
+            {name}: {value}
+        </Typography>
     </Box>
 );
 
-const ConfigSlider = ({
+const ConfigInput = ({
+    variant,
     configKey,
     min,
     max,
     ...props
-}: ComponentProps<typeof ConfigName> & { configKey: keyof Config; min: number; max: number }) => {
-    const value = useContext(ConfigContext);
+}: ComponentProps<typeof ConfigName> & { configKey: keyof Config; min: number; max: number; variant: 'slider' | 'manual' }) => {
+    const config = useContext(ConfigContext);
 
-    console.log('slider', value, configKey);
+    const handleChange = (value: number) => {
+        configStore.write({ ...config, [configKey]: value });
+    };
 
     return (
         <>
-            <ConfigName {...props} value={value[configKey]} />
+            <ConfigName {...props} value={config[configKey]} />
 
-            <Slider
-                aria-label='message-timeout-seconds'
-                valueLabelDisplay='auto'
-                marks
-                min={min}
-                max={max}
-                step={1}
-                defaultValue={value[configKey]}
-                value={value[configKey]}
-            />
+            {variant === 'slider' ? (
+                <Slider
+                    onChange={(_, value) => handleChange(value as number)}
+                    aria-label={configKey.toLowerCase().replace(/\s/g, '-')}
+                    valueLabelDisplay='auto'
+                    marks
+                    min={min}
+                    max={max}
+                    step={1}
+                    defaultValue={config[configKey]}
+                    value={config[configKey]}
+                />
+            ) : (
+                <TextField
+                    onChange={(e) => {
+                        const value = +e.target.value;
+                        handleChange(value < min ? min : value > max ? max : value);
+                    }}
+                    defaultValue={config[configKey]}
+                    value={config[configKey]}
+                    type='number'
+                    variant='standard'
+                    helperText={`Max: ${max}`}
+                />
+            )}
         </>
     );
 };
@@ -48,7 +67,8 @@ const ConfigSlider = ({
 export const Settings = () => {
     return (
         <Box component='form' name='settings'>
-            <ConfigSlider
+            <ConfigInput
+                variant='slider'
                 configKey='messageTimeoutSecs'
                 name='Message timeout seconds'
                 tip='The time between each message sent.'
@@ -56,19 +76,23 @@ export const Settings = () => {
                 max={15}
             />
 
-            <ConfigSlider
-                configKey='messageTimeoutSecs'
+            <ConfigInput
+                variant='slider'
+                configKey='startSequenceTimeoutSecs'
                 name='Pre-sequence timeout seconds'
                 tip='The time before the first message is sent (per sequence).'
                 min={0}
                 max={15}
             />
 
-            {/* todo */}
-            {/* <ConfigName
+            <ConfigInput
+                variant='manual'
+                configKey='stopAfterTimeoutMins'
                 name='Time to run'
                 tip='The number of minutes to run before automatically stopping. Set to 0 to run (theoretically) forever.'
-            /> */}
+                min={0}
+                max={120}
+            />
         </Box>
     );
 };
