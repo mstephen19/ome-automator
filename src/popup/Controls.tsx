@@ -10,6 +10,9 @@ const FlexContainer = styled(Box)({
     alignItems: 'center',
 });
 
+/**
+ * Uses {@link MessageSequenceContext}
+ */
 export const Controls = () => {
     const messageCount = useContext(MessageSequenceContext).length;
 

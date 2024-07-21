@@ -1,7 +1,6 @@
-import { List, ListItem, ListItemText, TextField } from '@mui/material';
+import { List, ListItem, ListItemText } from '@mui/material';
 import React, { useState, useContext } from 'react';
 import { messageStore } from '../../storage';
-import { sanitize } from '../../utils';
 import { MessageItem } from './MessageItem';
 
 import { MessageSequenceContext } from '../context/MessageSequenceProvider';

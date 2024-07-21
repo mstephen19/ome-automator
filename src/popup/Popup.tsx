@@ -3,11 +3,11 @@ import { MessageSequencer } from './MessageSequencer';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Controls } from './Controls';
 import { MessageSequenceProvider } from './context/MessageSequenceProvider';
-import { Settings } from './Settings';
-import { ConfigProvider } from './context/ConfigProvider';
+import { Accordions } from './Accordions';
+import { AppDataProvider } from './context/AppDataProvider';
 
 const AppWrapper = styled(Box)({
-    height: '450px',
+    height: '500px',
     width: '400px',
     overflowY: 'scroll',
     overflowX: 'hidden',
@@ -32,32 +32,13 @@ const App = () => {
             </AppBar>
 
             <AppContainer>
+                {/* List of messages */}
                 <MessageSequenceProvider>
-                    <Controls />
+                    <AppDataProvider>
+                        <Controls />
 
-                    {/* Message Sequence */}
-                    <Accordion>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography>Message Sequence</Typography>
-                        </AccordionSummary>
-
-                        <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'scroll' }}>
-                            <MessageSequencer />
-                        </AccordionDetails>
-                    </Accordion>
-
-                    {/* Configuration */}
-                    <Accordion>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography>Settings</Typography>
-                        </AccordionSummary>
-
-                        <AccordionDetails sx={{ overflowY: 'scroll' }}>
-                            <ConfigProvider>
-                                <Settings />
-                            </ConfigProvider>
-                        </AccordionDetails>
-                    </Accordion>
+                        <Accordions />
+                    </AppDataProvider>
                 </MessageSequenceProvider>
             </AppContainer>
         </AppWrapper>

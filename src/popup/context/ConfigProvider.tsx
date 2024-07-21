@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext } from 'react';
+import { createContext } from 'react';
 import { configStore } from '../../storage';
 
 import type { Config } from '../../types';
@@ -21,4 +21,5 @@ export const ConfigProvider = storeProvider({
     store: configStore,
     defaultValue: defaultConfig,
     context: ConfigContext,
+    merge: (fromStore, defaultValue) => ({ ...defaultValue, ...fromStore }),
 });

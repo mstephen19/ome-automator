@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext } from 'react';
+import { createContext } from 'react';
 import { messageStore } from '../../storage';
 
 import type { Message } from '../../types';

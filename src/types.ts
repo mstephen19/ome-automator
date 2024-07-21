@@ -17,3 +17,8 @@ export type Config = {
      */
     stopAfterTimeoutMins: number;
 };
+
+export type AppData = {
+    messageSequenceOpen: boolean;
+    settingsOpen: boolean;
+};
