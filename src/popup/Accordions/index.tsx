@@ -5,6 +5,7 @@ import { useContext } from 'react';
 import { MessageSequenceContext } from '../context/MessageSequenceProvider';
 
 import { AccordionItem } from './AccordionItem';
+import { Divider } from '@mui/material';
 
 export const Accordions = () => {
     const messages = useContext(MessageSequenceContext);
@@ -15,6 +16,8 @@ export const Accordions = () => {
             <AccordionItem dataKey='messageSequenceOpen' title='Message Sequence' avatar={messages.length.toString()} maxHeight='300px'>
                 <MessageSequencer />
             </AccordionItem>
+
+            <Divider />
 
             {/* Configuration */}
             <AccordionItem dataKey='settingsOpen' title='Settings'>

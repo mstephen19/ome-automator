@@ -2,7 +2,6 @@ import { List, ListItem, ListItemText } from '@mui/material';
 import React, { useState, useContext } from 'react';
 import { messageStore } from '../../storage';
 import { MessageItem } from './MessageItem';
-
 import { MessageSequenceContext } from '../context/MessageSequenceProvider';
 
 /**
