@@ -6,6 +6,7 @@ const AppWrapper = styled(Box)({
     height: '450px',
     width: '400px',
     overflowY: 'scroll',
+    overflowX: 'hidden',
 });
 
 const AppContainer = styled(Container)({
