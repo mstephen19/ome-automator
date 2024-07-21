@@ -3,7 +3,7 @@ import React, { useEffect, useState, useContext, createContext } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { messageStore } from '../../storage';
 import { sanitize } from '../../utils';
-import { MessageSequenceContext } from './MessageSequenceProvider';
+import { MessageSequenceContext } from '../context/MessageSequenceProvider';
 
 import type { Message } from '../../types';
 

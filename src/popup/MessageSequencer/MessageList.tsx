@@ -4,7 +4,7 @@ import { messageStore } from '../../storage';
 import { sanitize } from '../../utils';
 import { MessageItem } from './MessageItem';
 
-import { MessageSequenceContext } from './MessageSequenceProvider';
+import { MessageSequenceContext } from '../context/MessageSequenceProvider';
 
 /**
  * Shortcut for

@@ -1,9 +1,9 @@
-import { TextField } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { useState, useContext } from 'react';
 import { messageStore } from '../../storage';
 import { sanitize } from '../../utils';
 
-import { MessageSequenceContext } from './MessageSequenceProvider';
+import { MessageSequenceContext } from '../context/MessageSequenceProvider';
 
 export const AddMessageButton = () => {
     const messages = useContext(MessageSequenceContext);
@@ -46,6 +46,7 @@ export const AddMessageButton = () => {
             // Sanitize as the user types
             onChange={(e) => setInputText(e.target.value)}
             helperText={'Press "Enter" to add your message to the sequence.'}
+            // sx={{ position: 'sticky', top: 0 }}
         />
     );
 };

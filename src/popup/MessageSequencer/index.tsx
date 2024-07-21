@@ -1,13 +1,11 @@
 import { AddMessageButton } from './AddMessageButton';
 import { MessageList } from './MessageList';
-import { MessageSequenceProvider } from './MessageSequenceProvider';
+import { memo } from 'react';
 
-export const MessageSequencer = () => {
-    return (
-        <MessageSequenceProvider>
-            <AddMessageButton />
+export const MessageSequencer = memo(() => (
+    <>
+        <AddMessageButton />
 
-            <MessageList />
-        </MessageSequenceProvider>
-    );
-};
+        <MessageList />
+    </>
+));

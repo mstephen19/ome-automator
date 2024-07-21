@@ -1,6 +1,10 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Container, styled, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Container, styled, Toolbar, Typography } from '@mui/material';
 import { MessageSequencer } from './MessageSequencer';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Controls } from './Controls';
+import { MessageSequenceProvider } from './context/MessageSequenceProvider';
+import { Settings } from './Settings';
+import { ConfigProvider } from './context/ConfigProvider';
 
 const AppWrapper = styled(Box)({
     height: '450px',
@@ -14,23 +18,46 @@ const AppContainer = styled(Container)({
     padding: '10px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    // gap: '10px',
 });
 
 const App = () => {
     return (
         <AppWrapper>
-            <AppContainer>
-                {/* Message Sequence */}
-                <Accordion>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography>Message Sequence</Typography>
-                    </AccordionSummary>
+            <AppBar position='sticky'>
+                <Toolbar>
+                    <Typography fontSize='1rem'>Ome Automator</Typography>
+                </Toolbar>
+            </AppBar>
 
-                    <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'scroll' }}>
-                        <MessageSequencer />
-                    </AccordionDetails>
-                </Accordion>
+            <AppContainer>
+                <MessageSequenceProvider>
+                    <Controls />
+
+                    {/* Message Sequence */}
+                    <Accordion>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography>Message Sequence</Typography>
+                        </AccordionSummary>
+
+                        <AccordionDetails sx={{ maxHeight: '300px', overflowY: 'scroll' }}>
+                            <MessageSequencer />
+                        </AccordionDetails>
+                    </Accordion>
+
+                    {/* Configuration */}
+                    <Accordion>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography>Settings</Typography>
+                        </AccordionSummary>
+
+                        <AccordionDetails sx={{ overflowY: 'scroll' }}>
+                            <ConfigProvider>
+                                <Settings />
+                            </ConfigProvider>
+                        </AccordionDetails>
+                    </Accordion>
+                </MessageSequenceProvider>
             </AppContainer>
         </AppWrapper>
     );
