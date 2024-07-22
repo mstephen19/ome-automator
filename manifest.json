@@ -3,11 +3,11 @@
     "name": "Ome.tv Automator",
     "version": "1.0.0",
     "action": { "default_popup": "index.html" },
-    "permissions": ["storage"],
+    "permissions": ["storage", "tabs"],
     "content_scripts": [
         {
             "matches": ["https://ome.tv/*"],
-            "js": ["src/content/ometv.ts"]
+            "js": ["src/content/index.ts"]
         }
     ]
 }
