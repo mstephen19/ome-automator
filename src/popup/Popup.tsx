@@ -5,6 +5,7 @@ import { Controls } from './Controls';
 import { MessageSequenceProvider } from './context/MessageSequenceProvider';
 import { Accordions } from './Accordions';
 import { AppDataProvider } from './context/AppDataProvider';
+import { TabProvider } from './context/TabProvider';
 
 const AppWrapper = styled(Box)({
     height: '500px',
@@ -27,7 +28,7 @@ const App = () => {
             {/* todo: Theme switching */}
             <AppBar position='sticky'>
                 <Toolbar>
-                    <Typography fontSize='1rem'>Ome Automator</Typography>
+                    <Typography fontSize='1rem'>Ome.tv Automator</Typography>
                 </Toolbar>
             </AppBar>
 
@@ -35,9 +36,11 @@ const App = () => {
                 {/* List of messages */}
                 <MessageSequenceProvider>
                     <AppDataProvider>
-                        <Controls />
+                        <TabProvider>
+                            <Controls />
 
-                        <Accordions />
+                            <Accordions />
+                        </TabProvider>
                     </AppDataProvider>
                 </MessageSequenceProvider>
             </AppContainer>

@@ -18,7 +18,3 @@ export const elementRetriever =
     <T extends Element>(selector: string) =>
     () =>
         document.querySelector(selector) as T | undefined;
-
-const getTabs = async () => {
-    const tabs = await chrome.tabs.query({ url: 'https://ome.tv/*' });
-};
