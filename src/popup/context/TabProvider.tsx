@@ -1,12 +1,63 @@
-import { createContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { tabDataStore } from '../../storage';
+import { TabData } from '../../types';
+import { storeProvider } from './StoreProvider';
 
-const TabContext = createContext<chrome.tabs.Tab | null>(null);
+const defaultTabData: TabData = {
+    runningTab: null,
+    startedUnixMs: null,
+};
 
-export const TabProvider = ({ children }: { children?: ReactNode }) => {
+export const TabDataContext = createContext(defaultTabData);
+
+/**
+ * Handles the storage of tab-related data.
+ */
+const TabDataProvider = storeProvider({
+    store: tabDataStore,
+    context: TabDataContext,
+    defaultValue: defaultTabData,
+    merge: (fromStore, defaultValue) => ({ ...defaultValue, ...fromStore }),
+});
+
+const TargetTabContext = createContext<{
+    tab: chrome.tabs.Tab | null;
+    /**
+     * Mark the tab as running, allowing the popup to pick up from
+     * where it left off it is closed & reopened.
+     */
+    markRunning: () => Promise<void>;
+}>({
+    tab: null,
+    markRunning: async () => {},
+});
+
+/**
+ * Handles updates to tabs, and initializes with the `runningTab`
+ * when applicable.
+ */
+const TargetTabProvider = ({ children }: { children?: ReactNode }) => {
+    const tabData = useContext(TabDataContext);
+
     const [tab, setTab] = useState<chrome.tabs.Tab | null>(null);
 
     useEffect(() => {
+        // todo: cleanup
         const init = async () => {
+            // If there is a tab marked as running, check it.
+            if (tabData.runningTab !== null) {
+                const tab = await chrome.tabs.get(tabData.runningTab);
+
+                // If the tab still exists and is on Ome.tv, it's still valid
+                if (tab && tab.url?.startsWith('https://ome.tv')) {
+                    setTab(tab);
+                    return;
+                }
+
+                // If the runningTab is no longer on Ome.tv, reset state.
+                await tabDataStore.write(defaultTabData);
+            }
+
             const tabs = await chrome.tabs.query({ url: 'https://ome.tv/*', currentWindow: true });
             // If there are multiple matching tabs and one is active, use that one.
             // Otherwise, use the first one.
@@ -65,5 +116,27 @@ export const TabProvider = ({ children }: { children?: ReactNode }) => {
         };
     }, [tab]);
 
-    return <TabContext.Provider value={tab}>{children}</TabContext.Provider>;
+    const markRunning = useCallback(async () => {
+        if (tab === null) return;
+
+        await tabDataStore.write({ ...tabData, runningTab: tab.id || null });
+    }, [tabData, tab]);
+
+    return (
+        <TargetTabContext.Provider
+            value={{
+                tab,
+                markRunning,
+            }}>
+            {children}
+        </TargetTabContext.Provider>
+    );
 };
+
+export const TabContext = TargetTabContext;
+
+export const TabProvider = ({ children }: { children?: ReactNode }) => (
+    <TabDataProvider>
+        <TargetTabProvider>{children}</TargetTabProvider>
+    </TabDataProvider>
+);

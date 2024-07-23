@@ -26,7 +26,7 @@ export const AccordionItem = ({
     maxHeight,
     children,
 }: {
-    dataKey: keyof AppData;
+    dataKey: Exclude<keyof AppData, 'runningTab'>;
     title: string;
     avatar?: string;
     maxHeight?: string;

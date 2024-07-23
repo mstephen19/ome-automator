@@ -1,6 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Container, styled, Toolbar, Typography } from '@mui/material';
-import { MessageSequencer } from './MessageSequencer';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { AppBar, Box, Container, styled, Toolbar, Typography } from '@mui/material';
 import { Controls } from './Controls';
 import { MessageSequenceProvider } from './context/MessageSequenceProvider';
 import { Accordions } from './Accordions';
