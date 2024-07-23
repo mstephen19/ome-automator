@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Avatar, styled, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Avatar, Divider, styled, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { type ReactNode, useContext } from 'react';
 import { AppDataContext } from '../context/AppDataProvider';
@@ -26,7 +26,7 @@ export const AccordionItem = ({
     maxHeight,
     children,
 }: {
-    dataKey: Exclude<keyof AppData, 'runningTab'>;
+    dataKey: Exclude<keyof AppData, 'theme'>;
     title: string;
     avatar?: string;
     maxHeight?: string;

@@ -12,13 +12,13 @@ export const sequenceLoop = async (): Promise<void> => {
         if (err instanceof StoppedError) return;
 
         if (err instanceof StatusError) {
-            console.log('Disconnected detected.');
+            return sequenceLoop();
         }
 
         throw err;
     }
 
-    sequenceLoop();
+    return sequenceLoop();
 };
 
 async function main() {
@@ -26,7 +26,6 @@ async function main() {
     await messages.init();
     await config.init();
     await tabData.init();
-    console.log('Initialized data');
 
     if ([messages.data, config.data, tabData.data].some((val) => val === null)) {
         throw new Error('Critical data not found. Please open the Popup.');
@@ -35,8 +34,6 @@ async function main() {
     let started = false;
 
     commandReceiver.onStart(async () => {
-        console.log(messages.data, config.data, tabData.data);
-
         if (started) return;
         started = true;
 
@@ -49,6 +46,8 @@ async function main() {
         });
 
         await sequenceLoop();
+
+        started = false;
     });
 }
 

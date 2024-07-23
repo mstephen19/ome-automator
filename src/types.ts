@@ -21,6 +21,7 @@ export type Config = {
 export type AppData = {
     messageSequenceOpen: boolean;
     settingsOpen: boolean;
+    theme: 'light' | 'dark';
 };
 
 export type TabData = {

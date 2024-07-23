@@ -7,7 +7,6 @@ import { status, Status, raceWithStatus, StatusError } from './status';
 import { tabDataStore } from '../storage';
 
 const clickStart = () => {
-    console.log('Click Start');
     const start = elements.startButton()!;
     start.click();
 };
@@ -22,7 +21,6 @@ const clickStop = () => {
  * to something other than {@link Status.Idle}.
  */
 const startSearch = async () => {
-    console.log('startSearch()');
     // Only click start if not already Searching/Connected
     // If Searching -> Will be connected
     // If Connected -> Begin sequence in existing chat
@@ -52,7 +50,6 @@ const startSearch = async () => {
 
 // todo: Timeout?
 const waitForStatus = (predicate: (status: Status) => boolean) => () => {
-    console.log('waitForStatus()');
     if (predicate(status.latest)) return;
 
     return new Promise((resolve) => {
@@ -66,14 +63,12 @@ const waitForStatus = (predicate: (status: Status) => boolean) => () => {
 };
 
 const assertConnected = () => {
-    console.log('assertConnected()');
     if (status.latest !== Status.Connected) {
         throw new StatusError();
     }
 };
 
 const sleep = (key: keyof Config, multiplier: number) => async () => {
-    console.log('sleep()', key, config.data![key] * multiplier);
     await wait(config.data![key] * multiplier);
 };
 
@@ -81,7 +76,6 @@ const sleep = (key: keyof Config, multiplier: number) => async () => {
  * Update the chat box value and send the message.
  */
 const sendMessage = (value: string) => {
-    console.log('sendMessage()');
     const input = elements.chatInput()!;
 
     input.value = value;
@@ -120,7 +114,6 @@ const sendMessages = async () => {
 let stopped = false;
 
 commandReceiver.onStop(() => {
-    console.log('TOLD TO STOP');
     stopped = true;
 });
 
@@ -131,10 +124,10 @@ const stopIfRequired = async () => {
     const stopAfterDurationMs = config.data!.stopAfterTimeoutMins * 60_000;
 
     if (stopped || (stopAfterDurationMs !== 0 && durationSinceStartedMs >= stopAfterDurationMs)) {
-        console.log('Stopping');
         clickStop();
 
         await tabDataStore.write({ ...tabData.data!, startedUnixMs: null });
+        stopped = false;
         throw new StoppedError();
     }
 };

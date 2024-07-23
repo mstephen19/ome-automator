@@ -7,6 +7,7 @@ import { storeProvider } from './StoreProvider';
 const defaultAppData: AppData = {
     messageSequenceOpen: false,
     settingsOpen: false,
+    theme: 'light',
 };
 
 export const AppDataContext = createContext(defaultAppData);
