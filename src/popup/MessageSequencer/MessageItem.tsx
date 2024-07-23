@@ -60,9 +60,11 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
             />
 
             <Tooltip title='Remove' arrow>
-                <IconButton disabled={loading} sx={{ alignSelf: 'start' }} onClick={() => handleDelete()}>
-                    <DeleteIcon />
-                </IconButton>
+                <span>
+                    <IconButton disabled={loading} sx={{ alignSelf: 'start' }} onClick={() => handleDelete()}>
+                        <DeleteIcon />
+                    </IconButton>
+                </span>
             </Tooltip>
         </MessageListItem>
     );

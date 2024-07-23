@@ -73,12 +73,13 @@ export const Controls = () => {
         : 'Ready to go.';
 
     const handleStart = async () => {
-        await activateTab(tab!);
-
         // Set "runningTab" in tabStore
+        // todo: Send tabId from popup and mark running in content script?
         await markRunning();
 
         await sendTabCommand(tab!, Command.Start);
+
+        await activateTab(tab!);
     };
 
     const handleStop = async () => {
@@ -96,9 +97,11 @@ export const Controls = () => {
             <Box sx={{ width: '100%', display: 'flex' }}>
                 <FlexContainer sx={{ flex: 1 }}>
                     <Tooltip title={running ? 'Stop' : 'Start'} arrow>
-                        <IconButton disabled={!canStart} onClick={running ? handleStop : handleStart}>
-                            {<Icon sx={{ fontSize: '5rem' }} />}
-                        </IconButton>
+                        <span>
+                            <IconButton disabled={!canStart} onClick={running ? handleStop : handleStart}>
+                                {<Icon sx={{ fontSize: '5rem' }} />}
+                            </IconButton>
+                        </span>
                     </Tooltip>
                 </FlexContainer>
 

@@ -2,6 +2,8 @@ import { Command, CommandMessage } from './types';
 
 /**
  * Set a tab to active, if not already.
+ * 
+ * Note: Causes the popup to close.
  */
 export const activateTab = async (tab: chrome.tabs.Tab) => {
     // If the tab is already active, don't bother activating it

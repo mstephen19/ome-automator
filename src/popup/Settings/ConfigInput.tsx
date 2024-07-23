@@ -44,7 +44,6 @@ export const ConfigInput = ({
                     min={min}
                     max={max}
                     step={1}
-                    defaultValue={config[configKey]}
                     value={config[configKey]}
                 />
             ) : (
@@ -53,7 +52,6 @@ export const ConfigInput = ({
                         const value = +e.target.value;
                         handleChange(value < min ? min : value > max ? max : value);
                     }}
-                    defaultValue={config[configKey]}
                     value={config[configKey]}
                     type='number'
                     variant='standard'

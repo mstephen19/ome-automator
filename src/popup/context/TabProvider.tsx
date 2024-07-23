@@ -44,12 +44,15 @@ const TargetTabProvider = ({ children }: { children?: ReactNode }) => {
     useEffect(() => {
         // todo: cleanup
         const init = async () => {
+            console.log(tabData);
+
             // If there is a tab marked as running, check it.
             if (tabData.runningTab !== null) {
                 const tab = await chrome.tabs.get(tabData.runningTab);
 
                 // If the tab still exists and is on Ome.tv, it's still valid
                 if (tab && tab.url?.startsWith('https://ome.tv')) {
+                    console.log('Found previous');
                     setTab(tab);
                     return;
                 }
