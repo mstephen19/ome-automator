@@ -1,33 +1,9 @@
 import { tabDataStore } from '../storage';
 import { messages, tabData, config } from './cache';
 import { commands } from './commands';
-import { StatusError } from './status';
-import { handleStopped, sequence, StoppedError } from './sequence';
+import { resetToIdle, sequenceLoop } from './sequence';
 import { Command } from '../types';
-
-export const sequenceLoop = async (): Promise<void> => {
-    try {
-        await sequence();
-    } catch (err) {
-        // Shutdown if stopped.
-        if (err instanceof StoppedError) {
-            console.log('Stopping.');
-            return handleStopped();
-        }
-
-        if (err instanceof StatusError) {
-            console.log('Disconnected detected. Restarting.');
-            return sequenceLoop();
-        }
-
-        // Unknown Error
-        throw err;
-    }
-
-    return sequenceLoop();
-};
-
-// todo: Handle "Are you there?" popup
+import { status } from './status';
 
 async function main() {
     // Initialize data
@@ -36,26 +12,32 @@ async function main() {
     await tabData.init();
 
     if ([messages.data, config.data, tabData.data].some((val) => val === null)) {
+        // todo: Display warning
         throw new Error('Critical data not found. Please open the Popup.');
     }
 
-    const startListener = async () => {
-        // Clear "started" time if unloading - script will stop
-        window.addEventListener('beforeunload', handleStopped);
+    const startListener = async ({ detail: tabId }: CustomEvent<number>) => {
+        // Status is now needed, initialize it if not already.
+        await status.init();
+
+        // Updates the store to let the popup know the script is no longer running.
+        window.addEventListener('beforeunload', resetToIdle);
 
         await tabDataStore.write({
-            // todo: Possible to get tabId within the tab?
-            // todo: If so, possible to focus the tab from within content script?
-            ...tabData.data!,
+            runningTab: tabId,
             startedUnixMs: Date.now(),
         });
 
         try {
             await sequenceLoop();
         } catch (err) {
-            await handleStopped();
+            resetToIdle();
+
             // todo: Message UI - tab error. Refresh page.
             return;
+        } finally {
+            // No longer needed until "start" is called again.
+            window.removeEventListener('beforeunload', resetToIdle);
         }
 
         commands.events.addEventListener(Command.Start, startListener, { once: true });

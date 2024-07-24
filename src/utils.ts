@@ -124,3 +124,9 @@ export const raceWithEvent =
                     target.removeEventListener(eventName, listener);
                 }
             }) as Promise<Awaited<ReturnType<Operation>>>;
+
+export const pollPredicate = async (ms: number, predicate: () => boolean): Promise<void> => {
+    if (predicate()) return;
+    await wait(ms);
+    return pollPredicate(ms, predicate);
+};

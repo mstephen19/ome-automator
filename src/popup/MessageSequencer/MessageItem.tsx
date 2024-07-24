@@ -6,6 +6,7 @@ import { sanitize } from '../../utils';
 import { MessageSequenceContext } from '../context/MessageSequenceProvider';
 
 import type { Message } from '../../types';
+import { TabDataContext } from '../context/TabProvider';
 
 const MessageListItem = styled(ListItem)({
     display: 'flex',
@@ -13,6 +14,9 @@ const MessageListItem = styled(ListItem)({
 });
 
 export const MessageItem = ({ message, ...props }: { message: Message } & ListItemProps) => {
+    const { runningTab, startedUnixMs } = useContext(TabDataContext);
+    const running = runningTab !== null && startedUnixMs !== null;
+
     const messages = useContext(MessageSequenceContext);
     const [editing, setEditing] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -21,7 +25,6 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
      * Optionally pass a replacement {@link Message} to delete & replace.
      */
     const handleDelete = async (updated?: Partial<Message>) => {
-        // todo: Don't allow deleting all messages to 0 while running! Limit to 1 if running.
         const index = messages.findIndex(({ id }) => id === message.id);
         if (index === -1) return;
 
@@ -62,7 +65,12 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
 
             <Tooltip title='Remove' arrow>
                 <span>
-                    <IconButton disabled={loading} sx={{ alignSelf: 'start' }} onClick={() => handleDelete()}>
+                    <IconButton
+                        // ? Disallow deleting the last message in the sequence realtime if
+                        // ? it's the last one.
+                        disabled={loading || (running && messages.length === 1)}
+                        sx={{ alignSelf: 'start' }}
+                        onClick={() => handleDelete()}>
                         <DeleteIcon />
                     </IconButton>
                 </span>

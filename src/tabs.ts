@@ -19,4 +19,5 @@ export const sendTabCommand = async (tab: chrome.tabs.Tab, command: Command) =>
     chrome.tabs.sendMessage(tab.id!, {
         extensionId: chrome.runtime.id,
         command,
+        tabId: tab.id!,
     } as CommandMessage);

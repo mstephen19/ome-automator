@@ -1,7 +1,6 @@
-import { raceWithEvent, TypedEventTarget } from '../utils';
+import { pollPredicate, raceWithEvent, TypedEventTarget } from '../utils';
 import { elements } from './elements';
-
-export class StatusError extends Error {}
+import { StatusError, TimeoutError } from './errors';
 
 export const enum Status {
     Idle = 'idle',
@@ -32,8 +31,9 @@ const getStatus = (): Status => {
  * - **connection** => {@link Status.Connected}
  */
 const statusListener = () => {
-    // Keep in-memory cache of latest status
+    let initialized = false;
     let latest = getStatus();
+    // Keep in-memory cache of latest status
     const events = new TypedEventTarget<{ change: CustomEvent<Status> }>();
 
     // Constantly listen on the element
@@ -49,13 +49,21 @@ const statusListener = () => {
         events.dispatchEvent(new CustomEvent('change', { detail: latest }));
     });
 
-    // todo: What if the element isn't found?
-    observer.observe(elements.tip()!, {
-        attributes: true,
-        attributeFilter: ['data-tr'],
-    });
+    const init = async () => {
+        if (initialized) return;
+        initialized = true;
+
+        // Wait for the "tip" element to be present
+        await pollPredicate(250, () => Boolean(elements.tip()));
+
+        observer.observe(elements.tip()!, {
+            attributes: true,
+            attributeFilter: ['data-tr'],
+        });
+    };
 
     return {
+        init,
         get latest() {
             return latest;
         },
@@ -65,24 +73,40 @@ const statusListener = () => {
 
 export const status = statusListener();
 
+/**
+ * Run an operation & "cancel" it if the status changes.
+ */
 export const raceWithStatus = raceWithEvent(StatusError)(
     status.events,
     'change',
     () => new CustomEvent('change', { detail: status.latest })
 );
 
-// todo: Timeout?
-export const waitForStatus = (predicate: (status: Status) => boolean) => () => {
-    if (predicate(status.latest)) return;
+export const waitForStatus =
+    (predicate: (status: Status) => boolean, timeoutMs = 15_000) =>
+    () => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-    return new Promise((resolve) => {
-        const changeListener = ({ detail: latest }: CustomEvent<Status>) => {
-            if (!predicate(latest)) return;
+        if (predicate(status.latest)) return;
 
-            status.events.removeEventListener('change', changeListener);
-            resolve(undefined);
-        };
+        return new Promise((resolve, reject) => {
+            const abortListener = () => {
+                reject(new TimeoutError());
 
-        status.events.addEventListener('change', changeListener);
-    });
-};
+                controller.signal.removeEventListener('abort', abortListener);
+            };
+
+            controller.signal.addEventListener('abort', abortListener);
+
+            const changeListener = ({ detail: latest }: CustomEvent<Status>) => {
+                if (!predicate(latest)) return;
+
+                clearTimeout(timeout);
+                status.events.removeEventListener('change', changeListener);
+                resolve(undefined);
+            };
+
+            status.events.addEventListener('change', changeListener);
+        });
+    };

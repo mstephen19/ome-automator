@@ -1,6 +1,6 @@
 import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
-import { Box, CircularProgress, IconButton, Paper, styled, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, Paper, styled, Tooltip, Typography } from '@mui/material';
 import { MessageSequenceContext } from './context/MessageSequenceProvider';
 import { useContext, useEffect, memo, useState } from 'react';
 import { TabContext, TabDataContext } from './context/TabProvider';
@@ -31,6 +31,8 @@ const Stopwatch = memo(({ started }: { started: number | null }) => {
     const [diff, setDiff] = useState<number>(started === null ? 0 : Date.now() - started);
 
     useEffect(() => {
+        setDiff(started === null ? 0 : Date.now() - started), 1_000;
+
         const interval = setInterval(() => setDiff(started === null ? 0 : Date.now() - started), 1_000);
 
         return () => clearInterval(interval);
@@ -51,16 +53,16 @@ const Stopwatch = memo(({ started }: { started: number | null }) => {
  * Uses {@link MessageSequenceContext}
  */
 export const Controls = () => {
-    const { startedUnixMs } = useContext(TabDataContext);
+    const { runningTab, startedUnixMs } = useContext(TabDataContext);
 
-    const { tab, markRunning } = useContext(TabContext);
+    const tab = useContext(TabContext);
     const messageCount = useContext(MessageSequenceContext).length;
 
     const tabFound = tab !== null;
     const messagesFound = messageCount > 0;
     const canStart = tabFound && messagesFound;
 
-    const running = tabFound && startedUnixMs !== null;
+    const running = tabFound && runningTab !== null && startedUnixMs !== null;
 
     const Icon = running ? StopCircleIcon : PlayCircleFilledWhiteIcon;
 
@@ -73,12 +75,7 @@ export const Controls = () => {
         : 'Ready to go.';
 
     const handleStart = async () => {
-        // Set "runningTab" in tabStore
-        // todo: Send tabId from popup and mark running in content script?
-        await markRunning();
-
         await sendTabCommand(tab!, Command.Start);
-
         await activateTab(tab!);
     };
 

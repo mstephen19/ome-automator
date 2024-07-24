@@ -6,13 +6,14 @@ enum Selector {
     ChatInput = '#chat-text',
     // Used for "Status" (data-tr property)
     Tip = 'div.message-bubble > span',
+    // Shows up when camera is uncovered
+    ShowFaceButton = '#overlay.visible #ShowFacePopup div.btn-main',
 }
 
-// todo: Necessary to retrieve every time?
-// todo: Are there any cases where the element cannot be found?
 export const elements = {
     startButton: elementRetriever<HTMLDivElement>(Selector.StartButton),
     stopButton: elementRetriever<HTMLDivElement>(Selector.StopButton),
     chatInput: elementRetriever<HTMLInputElement>(Selector.ChatInput),
     tip: elementRetriever<HTMLSpanElement>(Selector.Tip),
+    showFaceButton: elementRetriever<HTMLDivElement>(Selector.ShowFaceButton),
 };

@@ -46,4 +46,5 @@ export const enum Command {
 export type CommandMessage = {
     extensionId: string;
     command: Command;
+    tabId: number;
 };

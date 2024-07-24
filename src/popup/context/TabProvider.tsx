@@ -20,17 +20,7 @@ const TabDataProvider = storeProvider({
     merge: (fromStore, defaultValue) => ({ ...defaultValue, ...fromStore }),
 });
 
-const TargetTabContext = createContext<{
-    tab: chrome.tabs.Tab | null;
-    /**
-     * Mark the tab as running, allowing the popup to pick up from
-     * where it left off it is closed & reopened.
-     */
-    markRunning: () => Promise<void>;
-}>({
-    tab: null,
-    markRunning: async () => {},
-});
+const TargetTabContext = createContext<chrome.tabs.Tab | null>(null);
 
 /**
  * Handles updates to tabs, and initializes with the `runningTab`
@@ -46,11 +36,11 @@ const TargetTabProvider = ({ children }: { children?: ReactNode }) => {
         const init = async () => {
             console.log(tabData);
 
-            // If there is a tab marked as running, check it.
+            // If there is a tab marked as running already, check it.
             if (tabData.runningTab !== null) {
                 const tab = await chrome.tabs.get(tabData.runningTab);
 
-                // If the tab still exists and is on Ome.tv, it's still valid
+                // Still exists and is on Ome.tv, it's still valid - pick up.
                 if (tab && tab.url?.startsWith('https://ome.tv')) {
                     console.log('Found previous tab');
                     setTab(tab);
@@ -119,21 +109,7 @@ const TargetTabProvider = ({ children }: { children?: ReactNode }) => {
         };
     }, [tab]);
 
-    const markRunning = useCallback(async () => {
-        if (tab === null) return;
-
-        await tabDataStore.write({ ...tabData, runningTab: tab.id || null });
-    }, [tabData, tab]);
-
-    return (
-        <TargetTabContext.Provider
-            value={{
-                tab,
-                markRunning,
-            }}>
-            {children}
-        </TargetTabContext.Provider>
-    );
+    return <TargetTabContext.Provider value={tab}>{children}</TargetTabContext.Provider>;
 };
 
 export const TabContext = TargetTabContext;

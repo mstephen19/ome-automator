@@ -1,10 +1,11 @@
 import { tabData, messages, config } from './cache';
 import { commands } from './commands';
 import { Command, Config } from '../types';
-import { pipeline, raceWithEvent, wait } from '../utils';
+import { pipeline, pollPredicate, raceWithEvent, wait } from '../utils';
 import { elements } from './elements';
-import { status, Status, StatusError, raceWithStatus, waitForStatus } from './status';
+import { status, Status, raceWithStatus, waitForStatus } from './status';
 import { tabDataStore } from '../storage';
+import { StatusError, TimeoutError, StoppedError } from './errors';
 
 const clickStart = () => {
     const start = elements.startButton()!;
@@ -27,9 +28,7 @@ const startSearch = async () => {
     if (status.latest !== Status.Idle) return;
 
     // Wait for the status to be "Searching".
-    // Using !== Status.Idle in the possible case of Idle -> Connected
-    // todo: Timeout? TimeoutError
-
+    // Using !== Status.Idle in the possible case of Idle -> Connected (which is OK)
     const statusWaiter = waitForStatus((status) => status !== Status.Idle);
     const waitForNotIdle = statusWaiter();
 
@@ -83,9 +82,10 @@ const sendMessages = async () => {
     }
 };
 
-export class StoppedError extends Error {}
-
-export const handleStopped = async () => {
+/**
+ * Click stop & mark the tab as no longer running.
+ */
+export const resetToIdle = async () => {
     clickStop();
 
     await tabDataStore.write({ runningTab: null, startedUnixMs: null });
@@ -104,18 +104,31 @@ const checkStopTime = async () => {
     const mustStop = durationSinceStartedMs >= stopAfterDurationMs;
 
     if (stopAfterEnabled && mustStop) {
-        await handleStopped();
+        await resetToIdle();
         throw new StoppedError();
     }
+};
+
+const bypassShowFaceMessage = async () => {
+    const button = elements.showFaceButton();
+    if (!button) return;
+
+    const waitForButtonToDisappear = pollPredicate(250, () => !elements.showFaceButton());
+
+    const interval = setInterval(() => {
+        button?.click();
+    }, 250);
+    await waitForButtonToDisappear;
+    clearInterval(interval);
 };
 
 /**
  * Runs the message sequence once. Throws {@link StatusError} if the
  * sequence must be restarted due to a status change (disconnected).
  */
-export const sequence = raceWithStopped(
+const sequence = raceWithStopped(
     pipeline(
-        // stopIfRequired,
+        bypassShowFaceMessage,
         // Click "Start" (if necessary). Spam it until "Searching".
         startSearch,
         // Wait for "Searching" to end.
@@ -134,6 +147,28 @@ export const sequence = raceWithStopped(
     )
 );
 
-// todo: Handle Click Restart if open in multiple tabs
-// todo: Handle click "Are you there?"
-// todo: Can't find tip element? Reload?
+export const sequenceLoop = async (): Promise<void> => {
+    try {
+        await sequence();
+    } catch (err) {
+        // Shutdown if stopped.
+        if (err instanceof StoppedError) {
+            console.log('Stopping.');
+            return resetToIdle();
+        }
+
+        if (err instanceof TimeoutError) {
+            console.log('Sequence timeout. Restarting.');
+            return sequenceLoop();
+        }
+
+        if (err instanceof StatusError) {
+            console.log('Disconnected detected. Restarting.');
+            return sequenceLoop();
+        }
+
+        throw err;
+    }
+
+    return sequenceLoop();
+};
