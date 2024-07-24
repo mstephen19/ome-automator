@@ -48,18 +48,26 @@ export class TypedEventTarget<EventMap = Record<string, Event>> extends EventTar
 type LooseConstructor<T = Error> = new (...args: any[]) => T;
 
 /**
- * Run an async operation wrapped in a Promise that rejects with `new Err()` if `predicate()` returns `false`
- * on any events received on `target` for the operation's duration (`target` being an EventTarget).
+ * Run an async operation wrapped in a Promise that rejects with `new Err()` if `predicate()` returns `true`
+ * on any event data received on `target.addEventListener(eventName)` for the operation's duration.
+ *
+ * With no provided predicate, the default will always return true.
  *
  * Optionally pass an `init()` function to check the `predicate()` before registering a listener.
  *
  * Note: Will not abort the async operation, will only reject its wrapper with an error.
+ *
+ * Use cases:
+ * 1. Must listen for "Stop" button click events from the popup while running the sequence, and cancel the sequence
+ * right when the stop button is clicked (with StoppedError).
+ *
+ * 2. Must immediately exit the message sequence if the status changes away from "connected", as to not continue sending
+ * messages - status is probably "searching".
  */
 export const raceWithEvent =
     /**
-     * The type of error to throw if the predicate returns false on an event
+     * The type of error to throw if the predicate returns true on an event
      */
-
 
         <ErrType extends Error>(Err: LooseConstructor<ErrType>) =>
         /**
@@ -68,23 +76,31 @@ export const raceWithEvent =
         <EventMap extends Record<string, Event>, EventName extends keyof EventMap>(
             target: TypedEventTarget<EventMap>,
             eventName: EventName,
-            init?: () => EventMap[EventName]
+            init?: () => EventMap[EventName] | null
         ) =>
         <Operation extends (...args: any[]) => any | Promise<any>>(
             operation: Operation,
-            predicate: (event: EventMap[EventName]) => boolean | Promise<boolean>
+            predicate: (event: EventMap[EventName]) => boolean | Promise<boolean> = () => true
         ) =>
         (...args: Parameters<Operation>) =>
             new Promise(async (resolve, reject) => {
-                // If the initialized event already fails, don't call anything else
-                if (typeof init === 'function' && !(await predicate(init()))) {
-                    reject(new Err());
-                    return;
+                if (typeof init === 'function') {
+                    const initEvent = init();
+
+                    // If the predicate fails on the init event, immediately reject
+                    // Don't call anything else
+                    if (initEvent !== null && (await predicate(initEvent))) {
+                        reject(new Err());
+                        return;
+                    }
                 }
 
-                // If the predicate fails during the operation at all,
+                // If the predicate fails (false) during the operation at all, reject.
                 const listener = async (event: EventMap[EventName]) => {
-                    if (!(await predicate(event))) {
+                    console.log('Received stop event');
+
+                    if (await predicate(event)) {
+                        console.log(true);
                         // Cleanup
                         target.removeEventListener(eventName, listener);
                         reject(new Err());

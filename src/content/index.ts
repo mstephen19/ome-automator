@@ -1,16 +1,18 @@
 import { tabDataStore } from '../storage';
 import { messages, tabData, config } from './cache';
-import { commands } from '../tabs';
+import { commands } from './commands';
 import { StatusError } from './status';
-import { sequence, StoppedError } from './sequence';
+import { handleStopped, sequence, StoppedError } from './sequence';
 import { Command } from '../types';
 
 export const sequenceLoop = async (): Promise<void> => {
     try {
         await sequence();
     } catch (err) {
-        // Stop running if stopped
-        if (err instanceof StoppedError) return;
+        if (err instanceof StoppedError) {
+            console.log('Stopping.');
+            return handleStopped();
+        }
 
         if (err instanceof StatusError) {
             console.log('Disconnected detected. Restarting.');
@@ -37,7 +39,7 @@ async function main() {
 
     const startListener = async () => {
         // Clear "started" time if unloading - script will stop
-        window.addEventListener('beforeunload', () => tabDataStore.write({ ...tabData.data!, startedUnixMs: null }));
+        window.addEventListener('beforeunload', () => tabDataStore.write({ runningTab: null, startedUnixMs: null }));
 
         await tabDataStore.write({
             // todo: Possible to get tabId within the tab?
@@ -46,7 +48,13 @@ async function main() {
             startedUnixMs: Date.now(),
         });
 
-        await sequenceLoop();
+        try {
+            await sequenceLoop();
+        } catch (err) {
+            await handleStopped();
+            // todo: Message UI - tab error. Refresh page.
+            return;
+        }
 
         commands.events.addEventListener(Command.Start, startListener, { once: true });
     };

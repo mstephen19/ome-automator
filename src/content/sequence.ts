@@ -1,7 +1,7 @@
 import { tabData, messages, config } from './cache';
-import { commands } from '../tabs';
+import { commands } from './commands';
 import { Command, Config } from '../types';
-import { pipeline, wait } from '../utils';
+import { pipeline, raceWithEvent, wait } from '../utils';
 import { elements } from './elements';
 import { status, Status, StatusError, raceWithStatus } from './status';
 import { tabDataStore } from '../storage';
@@ -99,40 +99,43 @@ const sendMessage = (value: string) => {
 
 // Handle status checks at the message level, so that the flow can be
 // cancelled right in the middle of the sequence.
-const messagePipeline = raceWithStatus(
-    pipeline<string, void>(
-        // todo: Spintax support
-        sendMessage,
-        sleep('messageTimeoutSecs', 1_000)
-    ),
-    // Throw StatusError if the chat disconnects at any time.
-    ({ detail: status }) => status === Status.Connected
+const messagePipeline = pipeline<string, void>(
+    // todo: Spintax support
+    sendMessage,
+    sleep('messageTimeoutSecs', 1_000)
 );
 
-const sendMessages = async () => {
-    for (const message of messages.data!) {
-        await messagePipeline(message.content);
-    }
-};
-
-// todo: Handle this more elegantly - need finer grained control to stop mid-flow
-let stopped = false;
-
-commands.events.addEventListener(Command.Stop, () => {
-    stopped = true;
-});
+const sendMessages = raceWithStatus(
+    async () => {
+        for (const message of messages.data!) {
+            await messagePipeline(message.content);
+        }
+    }, // Throw StatusError if the chat disconnects at any time.
+    ({ detail: status }) => status !== Status.Connected
+);
 
 export class StoppedError extends Error {}
 
-const stopIfRequired = async () => {
+export const handleStopped = async () => {
+    clickStop();
+
+    await tabDataStore.write({ runningTab: null, startedUnixMs: null });
+};
+
+const raceWithStopped = raceWithEvent(StoppedError)(commands.events, Command.Stop);
+
+/**
+ * Check if stopAfterDurationMs has been crossed.
+ */
+const checkStopTime = async () => {
     const durationSinceStartedMs = tabData.data?.startedUnixMs ? Date.now() - tabData.data!.startedUnixMs : 0;
     const stopAfterDurationMs = config.data!.stopAfterTimeoutMins * 60_000;
 
-    if (stopped || (stopAfterDurationMs !== 0 && durationSinceStartedMs >= stopAfterDurationMs)) {
-        clickStop();
+    const stopAfterEnabled = stopAfterDurationMs !== 0;
+    const mustStop = durationSinceStartedMs >= stopAfterDurationMs;
 
-        await tabDataStore.write({ ...tabData.data!, startedUnixMs: null });
-        stopped = false;
+    if (stopAfterEnabled && mustStop) {
+        await handleStopped();
         throw new StoppedError();
     }
 };
@@ -141,24 +144,27 @@ const stopIfRequired = async () => {
  * Runs the message sequence once. Throws {@link StatusError} if the
  * sequence must be restarted due to a status change (disconnected on).
  */
-export const sequence = pipeline(
-    stopIfRequired,
-    // Click "Start" (if necessary). Spam it until "Searching".
-    startSearch,
-    // Wait for "Searching" to end.
-    waitForStatus((status) => status !== Status.Searching),
-    // Ensure connected to stranger.
-    assertConnected,
-    // Wait pre-sequence timeout.
-    raceWithStatus(sleep('startSequenceTimeoutSecs', 1_000), ({ detail: status }) => status === Status.Connected),
-    // Ensure still connected.
-    assertConnected,
-    // Send all messages.
-    sendMessages,
-    // todo: Send a message back to the popup
-    // todo: Completed sequences # count
-    // Click "Next" (AKA "Start").
-    clickStart
+export const sequence = raceWithStopped(
+    pipeline(
+        // stopIfRequired,
+        // Click "Start" (if necessary). Spam it until "Searching".
+        startSearch,
+        // Wait for "Searching" to end.
+        waitForStatus((status) => status !== Status.Searching),
+        // Ensure connected to stranger.
+        assertConnected,
+        // Wait pre-sequence timeout.
+        raceWithStatus(sleep('startSequenceTimeoutSecs', 1_000), ({ detail: status }) => status !== Status.Connected),
+        // Ensure still connected.
+        assertConnected,
+        // Send all messages.
+        sendMessages,
+        checkStopTime,
+        // todo: Send a message back to the popup
+        // todo: Completed sequences # count
+        // Click "Next" (AKA "Start").
+        clickStart
+    )
 );
 
 // todo: Handle Click Restart if open in multiple tabs

@@ -1,5 +1,4 @@
 import { Command, CommandMessage } from './types';
-import { TypedEventTarget } from './utils';
 
 /**
  * Set a tab to active, if not already.
@@ -21,22 +20,3 @@ export const sendTabCommand = async (tab: chrome.tabs.Tab, command: Command) =>
         extensionId: chrome.runtime.id,
         command,
     } as CommandMessage);
-
-const tabCommandReceiver = () => {
-    const events = new TypedEventTarget<{
-        [Command.Start]: CustomEvent<undefined>;
-        [Command.Stop]: CustomEvent<undefined>;
-    }>();
-
-    chrome.runtime.onMessage.addListener(({ extensionId, command }: CommandMessage) => {
-        if (extensionId !== chrome.runtime.id) return;
-
-        events.dispatchEvent(new CustomEvent(command));
-    });
-
-    return {
-        events,
-    };
-};
-
-export const commands = tabCommandReceiver();
