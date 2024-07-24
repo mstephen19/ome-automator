@@ -1,14 +1,8 @@
 import { createContext } from 'react';
 import { configStore } from '../../storage';
 
-import type { Config } from '../../types';
 import { storeProvider } from './StoreProvider';
-
-const defaultConfig: Config = {
-    messageTimeoutSecs: 1,
-    startSequenceTimeoutSecs: 0,
-    stopAfterTimeoutMins: 0,
-};
+import { defaultConfig } from '../../consts';
 
 export const ConfigContext = createContext(defaultConfig);
 

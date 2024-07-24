@@ -4,17 +4,14 @@ import { commands } from './commands';
 import { resetToIdle, sequenceLoop } from './sequence';
 import { Command } from '../types';
 import { status } from './status';
+import { defaultConfig, defaultMessageSequence, defaultTabData } from '../consts';
 
 async function main() {
     // Initialize data
-    await messages.init();
-    await config.init();
-    await tabData.init();
-
-    if ([messages.data, config.data, tabData.data].some((val) => val === null)) {
-        // todo: Display warning
-        throw new Error('Critical data not found. Please open the Popup.');
-    }
+    // After this call, these caches cannot be null - they are populated with default data.
+    await messages.init(defaultMessageSequence);
+    await config.init(defaultConfig);
+    await tabData.init(defaultTabData);
 
     const startListener = async ({ detail: tabId }: CustomEvent<number>) => {
         // Status is now needed, initialize it if not already.

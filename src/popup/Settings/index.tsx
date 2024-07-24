@@ -1,34 +1,47 @@
 import { Box } from '@mui/material';
-import { ConfigInput } from './ConfigInput';
+import { ConfigNumberInput } from './ConfigNumberInput';
 
 export const Settings = () => {
     return (
         <Box component='form' name='settings'>
-            <ConfigInput
+            <ConfigNumberInput
+                unit='sec(s)'
                 variant='slider'
                 configKey='messageTimeoutSecs'
-                name='Message timeout seconds'
-                tip='The time between each message sent.'
+                name='Time between messages'
+                tip='Number of seconds to wait between each message sent.'
                 min={1}
-                max={15}
+                max={30}
             />
 
-            <ConfigInput
+            <ConfigNumberInput
+                unit='sec(s)'
                 variant='slider'
                 configKey='startSequenceTimeoutSecs'
-                name='Pre-sequence timeout seconds'
-                tip='The time before the first message is sent (per sequence).'
+                name='Pre-sequence wait time'
+                tip='Number of seconds to wait BEFORE the FIRST message is sent (per sequence).'
                 min={0}
-                max={15}
+                max={30}
             />
 
-            <ConfigInput
-                variant='manual'
-                configKey='stopAfterTimeoutMins'
-                name='Time to run'
-                tip='The number of minutes to run before automatically stopping. Set to 0 to run (theoretically) forever.'
+            <ConfigNumberInput
+                unit='sec(s)'
+                variant='slider'
+                configKey='endSequenceTimeoutSecs'
+                name='Post-sequence wait time'
+                tip='Number of seconds to wait AFTER the LAST message is sent (per sequence).'
                 min={0}
-                max={120}
+                max={30}
+            />
+
+            <ConfigNumberInput
+                unit='min(s)'
+                variant='number'
+                configKey='stopAfterTimeoutMins'
+                name='Minutes to run for'
+                tip={`Number of minutes to run for before auto-stopping. "0" means no limit. Max is 4 hours.`}
+                min={0}
+                max={240}
             />
         </Box>
     );

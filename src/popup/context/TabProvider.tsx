@@ -1,12 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { tabDataStore } from '../../storage';
-import { TabData } from '../../types';
 import { storeProvider } from './StoreProvider';
-
-const defaultTabData: TabData = {
-    runningTab: null,
-    startedUnixMs: null,
-};
+import { defaultTabData } from '../../consts';
 
 export const TabDataContext = createContext(defaultTabData);
 

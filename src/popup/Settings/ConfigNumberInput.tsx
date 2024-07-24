@@ -6,25 +6,30 @@ import InfoIcon from '@mui/icons-material/Info';
 import { Config } from '../../types';
 import { configStore } from '../../storage';
 
-const ConfigName = ({ name, tip, value }: { name: string; tip: string; value?: number }) => (
+const ConfigName = ({ name, tip, value, unit }: { name: string; tip: string; value?: number; unit: string }) => (
     <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         <Tooltip title={tip} arrow placement='top'>
             <InfoIcon sx={{ fontSize: '1rem', cursor: 'pointer' }} />
         </Tooltip>
 
         <Typography>
-            {name}: {value}
+            {name}: {value} {unit}
         </Typography>
     </Box>
 );
 
-export const ConfigInput = ({
+export const ConfigNumberInput = ({
     variant,
     configKey,
     min,
     max,
     ...props
-}: ComponentProps<typeof ConfigName> & { configKey: keyof Config; min: number; max: number; variant: 'slider' | 'manual' }) => {
+}: ComponentProps<typeof ConfigName> & {
+    configKey: keyof Config;
+    min: number;
+    max: number;
+    variant: 'slider' | 'number';
+}) => {
     const config = useContext(ConfigContext);
 
     const handleChange = (value: number) => {
@@ -35,7 +40,7 @@ export const ConfigInput = ({
         <>
             <ConfigName {...props} value={config[configKey]} />
 
-            {variant === 'slider' ? (
+            {variant === 'slider' && (
                 <Slider
                     onChange={(_, value) => handleChange(value as number)}
                     aria-label={configKey.toLowerCase().replace(/\s/g, '-')}
@@ -46,7 +51,9 @@ export const ConfigInput = ({
                     step={1}
                     value={config[configKey]}
                 />
-            ) : (
+            )}
+
+            {variant === 'number' && (
                 <TextField
                     onChange={(e) => {
                         const value = +e.target.value;

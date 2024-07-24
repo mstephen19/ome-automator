@@ -44,7 +44,7 @@ const startSearch = async () => {
 };
 
 const sleep = (key: keyof Config, multiplier: number) => async () => {
-    await wait(config.data![key] * multiplier);
+    await wait(config.latest![key] * multiplier);
 };
 
 /**
@@ -67,6 +67,19 @@ const sendMessage = (value: string) => {
     );
 };
 
+/**
+ * Check if stopAfterDurationMs has been crossed.
+ */
+const checkStopTime = async () => {
+    const durationSinceStartedMs = tabData.latest?.startedUnixMs ? Date.now() - tabData.latest!.startedUnixMs : 0;
+    const stopAfterDurationMs = config.latest!.stopAfterTimeoutMins * 60_000;
+
+    const stopAfterEnabled = stopAfterDurationMs !== 0;
+    const mustStop = durationSinceStartedMs >= stopAfterDurationMs;
+
+    if (stopAfterEnabled && mustStop) throw new StoppedError();
+};
+
 const messagePipeline = raceWithStatus(
     pipeline<string, void>(
         // todo: Spintax support
@@ -77,7 +90,7 @@ const messagePipeline = raceWithStatus(
 );
 
 const sendMessages = async () => {
-    for (const message of messages.data!) {
+    for (const message of messages.latest!) {
         await messagePipeline(message.content);
     }
 };
@@ -96,22 +109,6 @@ export const resetToIdle = async () => {
 };
 
 const raceWithStopped = raceWithEvent(StoppedError)(commands.events, Command.Stop);
-
-/**
- * Check if stopAfterDurationMs has been crossed.
- */
-const checkStopTime = async () => {
-    const durationSinceStartedMs = tabData.data?.startedUnixMs ? Date.now() - tabData.data!.startedUnixMs : 0;
-    const stopAfterDurationMs = config.data!.stopAfterTimeoutMins * 60_000;
-
-    const stopAfterEnabled = stopAfterDurationMs !== 0;
-    const mustStop = durationSinceStartedMs >= stopAfterDurationMs;
-
-    if (stopAfterEnabled && mustStop) {
-        await resetToIdle();
-        throw new StoppedError();
-    }
-};
 
 const bypassShowFaceMessage = async () => {
     const button = elements.showFaceButton();
@@ -148,8 +145,11 @@ const sequence = raceWithStopped(
         // Ensure connected to one stranger the whole time.
         // Send all messages.
         sendMessages,
-        // Stop if running longer than stopAfterMins
+        // Check if should stop or not (stopAfterMins).
         checkStopTime,
+        // Ensure connected to one stranger the whole time.
+        // Wait post-sequence timeout.
+        raceWithStatus(sleep('endSequenceTimeoutSecs', 1_000), ({ detail: status }) => status !== Status.Connected),
         // Click "Next" (AKA "Start").
         clickStart
     )
@@ -161,17 +161,17 @@ export const sequenceLoop = async (): Promise<void> => {
     } catch (err) {
         // Shutdown if stopped.
         if (err instanceof StoppedError) {
-            console.log('Stopping.');
+            console.debug('Stopped gracefully.');
             return resetToIdle();
         }
 
         if (err instanceof TimeoutError) {
-            console.log('Sequence timeout. Restarting.');
+            console.debug('Timeout. Restarting.');
             return sequenceLoop();
         }
 
         if (err instanceof StatusError) {
-            console.log('Disconnected detected. Restarting.');
+            console.debug('Early disconnection. Restarting.');
             return sequenceLoop();
         }
 

@@ -93,7 +93,7 @@ export const Controls = () => {
 
             <Box sx={{ width: '100%', display: 'flex' }}>
                 <FlexContainer sx={{ flex: 1 }}>
-                    <Tooltip title={running ? 'Stop' : 'Start'} arrow>
+                    <Tooltip title={running ? 'Stop' : 'Start'} arrow placement='right'>
                         <span>
                             <IconButton disabled={!canStart} onClick={running ? handleStop : handleStart}>
                                 {<Icon sx={{ fontSize: '5rem' }} />}

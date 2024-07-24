@@ -30,20 +30,27 @@ export function storeProvider<Data>({
         const [data, setData] = useState<Data>(defaultValue);
 
         useEffect(() => {
-            // On initial render, populate messages
-            const hydrateConfig = async () => {
+            // On initial render, populate store
+            const hydrateStore = async () => {
                 const pulledData = await store.read();
 
                 if (pulledData) {
-                    // If a merge function was provided,
-                    const merged = merge?.(pulledData, defaultValue) || pulledData;
-                    setData(merged);
+                    if (typeof merge === 'function') {
+                        const merged = merge(pulledData, defaultValue);
+
+                        // Write the latest merged in default data back to the store.
+                        await store.write(merged);
+                        setData(merged);
+                        return;
+                    }
+
+                    setData(pulledData);
                 }
                 // If there is no data in the store, initialize it with the default value.
                 else await store.write(defaultValue);
             };
 
-            hydrateConfig();
+            hydrateStore();
 
             // Detect storage-level changes and update component state
             const removeListener = store.onChange((latestData) => {

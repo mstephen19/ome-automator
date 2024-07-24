@@ -1,10 +1,8 @@
 import { createContext } from 'react';
 import { messageStore } from '../../storage';
 
-import type { Message } from '../../types';
 import { storeProvider } from './StoreProvider';
-
-const defaultMessageSequence: Message[] = [];
+import { defaultMessageSequence } from '../../consts';
 
 export const MessageSequenceContext = createContext(defaultMessageSequence);
 

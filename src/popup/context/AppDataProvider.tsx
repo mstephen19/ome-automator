@@ -1,14 +1,8 @@
 import { createContext } from 'react';
 import { appDataStore } from '../../storage';
 
-import type { AppData } from '../../types';
 import { storeProvider } from './StoreProvider';
-
-const defaultAppData: AppData = {
-    messageSequenceOpen: false,
-    settingsOpen: false,
-    theme: 'light',
-};
+import { defaultAppData } from '../../consts';
 
 export const AppDataContext = createContext(defaultAppData);
 

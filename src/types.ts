@@ -13,6 +13,10 @@ export type Config = {
      */
     startSequenceTimeoutSecs: number;
     /**
+     * Number of seconds to wait after sending the last message.
+     */
+    endSequenceTimeoutSecs: number;
+    /**
      * Number of minutes to run for before stopping.
      */
     stopAfterTimeoutMins: number;

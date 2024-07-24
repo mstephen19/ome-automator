@@ -100,10 +100,7 @@ export const raceWithEvent =
 
                 // If the predicate fails (false) during the operation at all, reject.
                 const listener = async (event: EventMap[EventName]) => {
-                    console.log('Received stop event');
-
                     if (await predicate(event)) {
-                        console.log(true);
                         // Cleanup
                         target.removeEventListener(eventName, listener);
                         reject(new Err());

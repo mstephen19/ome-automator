@@ -34,16 +34,27 @@ export const chromeStorage = <Data>(storage: chrome.storage.StorageArea, key: st
  * {@link chromeStorage} subscriber.
  *
  * Cache a readable copy of the {@link chromeStorage} API. Updates the cache when `onChange` fires.
+ *
+ * Provides a realtime view of a store, allowing immediate access to the latest data.
  */
 export const memCache = <Data>(api: ReturnType<typeof chromeStorage<Data>>) => {
-    let data: Data | null = null;
-
-    api.onChange((latest) => (data = latest));
+    let latest: Data | null = null;
 
     return {
-        init: async () => (data = (await api.read()) ?? null),
-        get data() {
-            return data;
+        init: async (defaultValue: Data) => {
+            // ! Not merging any newest config changes
+            // Not necessary, because Popup handles merges.
+            latest = (await api.read()) ?? null;
+
+            if (latest === null) {
+                await api.write(defaultValue);
+                latest = defaultValue;
+            }
+
+            api.onChange((latestData) => (latest = latestData));
+        },
+        get latest() {
+            return latest;
         },
     };
 };
