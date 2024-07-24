@@ -1,9 +1,9 @@
 import { tabData, messages, config } from './cache';
-import { commandReceiver } from '../tabs';
-import { Config } from '../types';
+import { commands } from '../tabs';
+import { Command, Config } from '../types';
 import { pipeline, wait } from '../utils';
 import { elements } from './elements';
-import { status, Status, raceWithStatus, StatusError } from './status';
+import { status, Status, StatusError, raceWithStatus } from './status';
 import { tabDataStore } from '../storage';
 
 const clickStart = () => {
@@ -28,14 +28,17 @@ const startSearch = async () => {
 
     // Wait for the status to be "Searching".
     // Using !== Status.Idle in the possible case of Idle -> Connected
-    // todo: Timeout?
+    // todo: Timeout? TimeoutError
     const waitForNotIdle = new Promise((resolve) => {
-        const cleanup = status.onChange((latest) => {
+        const changeListener = ({ detail: latest }: CustomEvent<Status>) => {
             if (latest !== Status.Idle) {
                 resolve(undefined);
-                cleanup();
+
+                status.events.removeEventListener('change', changeListener);
             }
-        });
+        };
+
+        status.events.addEventListener('change', changeListener);
     });
 
     // Ome.tv doesn't disable the "Start" button, even if it's not ready to use.
@@ -53,12 +56,14 @@ const waitForStatus = (predicate: (status: Status) => boolean) => () => {
     if (predicate(status.latest)) return;
 
     return new Promise((resolve) => {
-        const cleanup = status.onChange((latest) => {
+        const changeListener = ({ detail: latest }: CustomEvent<Status>) => {
             if (!predicate(latest)) return;
 
-            cleanup();
+            status.events.removeEventListener('change', changeListener);
             resolve(undefined);
-        });
+        };
+
+        status.events.addEventListener('change', changeListener);
     });
 };
 
@@ -101,7 +106,7 @@ const messagePipeline = raceWithStatus(
         sleep('messageTimeoutSecs', 1_000)
     ),
     // Throw StatusError if the chat disconnects at any time.
-    (status) => status !== Status.Connected
+    ({ detail: status }) => status === Status.Connected
 );
 
 const sendMessages = async () => {
@@ -113,7 +118,7 @@ const sendMessages = async () => {
 // todo: Handle this more elegantly - need finer grained control to stop mid-flow
 let stopped = false;
 
-commandReceiver.onStop(() => {
+commands.events.addEventListener(Command.Stop, () => {
     stopped = true;
 });
 
@@ -145,7 +150,7 @@ export const sequence = pipeline(
     // Ensure connected to stranger.
     assertConnected,
     // Wait pre-sequence timeout.
-    raceWithStatus(sleep('startSequenceTimeoutSecs', 1_000), (status) => status !== Status.Connected),
+    raceWithStatus(sleep('startSequenceTimeoutSecs', 1_000), ({ detail: status }) => status === Status.Connected),
     // Ensure still connected.
     assertConnected,
     // Send all messages.
@@ -155,3 +160,7 @@ export const sequence = pipeline(
     // Click "Next" (AKA "Start").
     clickStart
 );
+
+// todo: Handle Click Restart if open in multiple tabs
+// todo: Handle click "Are you there?"
+// todo: Can't find tip element? Reload?

@@ -1,8 +1,9 @@
 import { Command, CommandMessage } from './types';
+import { TypedEventTarget } from './utils';
 
 /**
  * Set a tab to active, if not already.
- * 
+ *
  * Note: Causes the popup to close.
  */
 export const activateTab = async (tab: chrome.tabs.Tab) => {
@@ -22,22 +23,20 @@ export const sendTabCommand = async (tab: chrome.tabs.Tab, command: Command) =>
     } as CommandMessage);
 
 const tabCommandReceiver = () => {
-    const commandHandler = (commandToHandle: Command) => (handler: () => void | Promise<void>) => {
-        const listener = async ({ extensionId, command }: CommandMessage) => {
-            if (extensionId !== chrome.runtime.id || command !== commandToHandle) return;
+    const events = new TypedEventTarget<{
+        [Command.Start]: CustomEvent<undefined>;
+        [Command.Stop]: CustomEvent<undefined>;
+    }>();
 
-            await handler();
-        };
+    chrome.runtime.onMessage.addListener(({ extensionId, command }: CommandMessage) => {
+        if (extensionId !== chrome.runtime.id) return;
 
-        chrome.runtime.onMessage.addListener(listener);
-
-        return () => chrome.runtime.onMessage.addListener(listener);
-    };
+        events.dispatchEvent(new CustomEvent(command));
+    });
 
     return {
-        onStart: commandHandler(Command.Start),
-        onStop: commandHandler(Command.Stop),
+        events,
     };
 };
 
-export const commandReceiver = tabCommandReceiver();
+export const commands = tabCommandReceiver();

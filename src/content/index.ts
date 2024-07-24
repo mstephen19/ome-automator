@@ -1,8 +1,9 @@
 import { tabDataStore } from '../storage';
 import { messages, tabData, config } from './cache';
-import { commandReceiver } from '../tabs';
+import { commands } from '../tabs';
 import { StatusError } from './status';
 import { sequence, StoppedError } from './sequence';
+import { Command } from '../types';
 
 export const sequenceLoop = async (): Promise<void> => {
     try {
@@ -12,6 +13,7 @@ export const sequenceLoop = async (): Promise<void> => {
         if (err instanceof StoppedError) return;
 
         if (err instanceof StatusError) {
+            console.log('Disconnected detected. Restarting.');
             return sequenceLoop();
         }
 
@@ -20,6 +22,8 @@ export const sequenceLoop = async (): Promise<void> => {
 
     return sequenceLoop();
 };
+
+// todo: Handle "Are you there?" popup
 
 async function main() {
     // Initialize data
@@ -31,24 +35,23 @@ async function main() {
         throw new Error('Critical data not found. Please open the Popup.');
     }
 
-    let started = false;
-
-    commandReceiver.onStart(async () => {
-        if (started) return;
-        started = true;
-
+    const startListener = async () => {
         // Clear "started" time if unloading - script will stop
         window.addEventListener('beforeunload', () => tabDataStore.write({ ...tabData.data!, startedUnixMs: null }));
 
         await tabDataStore.write({
+            // todo: Possible to get tabId within the tab?
+            // todo: If so, possible to focus the tab from within content script?
             ...tabData.data!,
             startedUnixMs: Date.now(),
         });
 
         await sequenceLoop();
 
-        started = false;
-    });
+        commands.events.addEventListener(Command.Start, startListener, { once: true });
+    };
+
+    commands.events.addEventListener(Command.Start, startListener, { once: true });
 }
 
 main();

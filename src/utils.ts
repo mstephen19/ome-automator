@@ -18,3 +18,90 @@ export const elementRetriever =
     <T extends Element>(selector: string) =>
     () =>
         document.querySelector(selector) as T | undefined;
+
+export class TypedEventTarget<EventMap = Record<string, Event>> extends EventTarget {
+    addEventListener<K extends keyof EventMap>(
+        type: K,
+        listener: (event: EventMap[K]) => void | Promise<void>,
+        options?: AddEventListenerOptions | boolean
+    ): void;
+    addEventListener(type: string, callback: EventListenerOrEventListenerObject | null, options?: AddEventListenerOptions | boolean): void;
+    addEventListener(type: any, listener: any, options?: any): void {
+        super.addEventListener(type, listener, options);
+    }
+
+    removeEventListener<K extends keyof EventMap>(
+        type: K,
+        callback: (event: EventMap[K]) => void | Promise<void>,
+        options?: EventListenerOptions | boolean
+    ): void;
+    removeEventListener(type: string, callback: EventListenerOrEventListenerObject | null, options?: EventListenerOptions | boolean): void;
+    removeEventListener(type: any, callback: any, options?: any): void {
+        super.removeEventListener(type, callback, options);
+    }
+
+    dispatchEvent(event: Event): boolean {
+        return super.dispatchEvent(event);
+    }
+}
+
+type LooseConstructor<T = Error> = new (...args: any[]) => T;
+
+/**
+ * Run an async operation wrapped in a Promise that rejects with `new Err()` if `predicate()` returns `false`
+ * on any events received on `target` for the operation's duration (`target` being an EventTarget).
+ *
+ * Optionally pass an `init()` function to check the `predicate()` before registering a listener.
+ *
+ * Note: Will not abort the async operation, will only reject its wrapper with an error.
+ */
+export const raceWithEvent =
+    /**
+     * The type of error to throw if the predicate returns false on an event
+     */
+
+
+        <ErrType extends Error>(Err: LooseConstructor<ErrType>) =>
+        /**
+         * The event target, which event to listen to, and (optionally) how to initialize it.
+         */
+        <EventMap extends Record<string, Event>, EventName extends keyof EventMap>(
+            target: TypedEventTarget<EventMap>,
+            eventName: EventName,
+            init?: () => EventMap[EventName]
+        ) =>
+        <Operation extends (...args: any[]) => any | Promise<any>>(
+            operation: Operation,
+            predicate: (event: EventMap[EventName]) => boolean | Promise<boolean>
+        ) =>
+        (...args: Parameters<Operation>) =>
+            new Promise(async (resolve, reject) => {
+                // If the initialized event already fails, don't call anything else
+                if (typeof init === 'function' && !(await predicate(init()))) {
+                    reject(new Err());
+                    return;
+                }
+
+                // If the predicate fails during the operation at all,
+                const listener = async (event: EventMap[EventName]) => {
+                    if (!(await predicate(event))) {
+                        // Cleanup
+                        target.removeEventListener(eventName, listener);
+                        reject(new Err());
+                    }
+                };
+
+                target.addEventListener(eventName, listener);
+
+                try {
+                    // Not aborting, just rejecting the wrapper.
+                    const result = await operation(...args);
+                    // If already rejected, this will do nothing.
+                    resolve(result);
+                } catch (error) {
+                    reject(error);
+                } finally {
+                    // Cleanup
+                    target.removeEventListener(eventName, listener);
+                }
+            }) as Promise<Awaited<ReturnType<Operation>>>;

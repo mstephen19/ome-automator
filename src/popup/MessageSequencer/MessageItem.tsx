@@ -21,6 +21,7 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
      * Optionally pass a replacement {@link Message} to delete & replace.
      */
     const handleDelete = async (updated?: Partial<Message>) => {
+        // todo: Don't allow deleting all messages to 0 while running! Limit to 1 if running.
         const index = messages.findIndex(({ id }) => id === message.id);
         if (index === -1) return;
 
