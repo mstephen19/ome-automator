@@ -9,6 +9,7 @@ export const sequenceLoop = async (): Promise<void> => {
     try {
         await sequence();
     } catch (err) {
+        // Shutdown if stopped.
         if (err instanceof StoppedError) {
             console.log('Stopping.');
             return handleStopped();
@@ -19,6 +20,7 @@ export const sequenceLoop = async (): Promise<void> => {
             return sequenceLoop();
         }
 
+        // Unknown Error
         throw err;
     }
 
@@ -39,7 +41,7 @@ async function main() {
 
     const startListener = async () => {
         // Clear "started" time if unloading - script will stop
-        window.addEventListener('beforeunload', () => tabDataStore.write({ runningTab: null, startedUnixMs: null }));
+        window.addEventListener('beforeunload', handleStopped);
 
         await tabDataStore.write({
             // todo: Possible to get tabId within the tab?

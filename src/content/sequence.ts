@@ -3,7 +3,7 @@ import { commands } from './commands';
 import { Command, Config } from '../types';
 import { pipeline, raceWithEvent, wait } from '../utils';
 import { elements } from './elements';
-import { status, Status, StatusError, raceWithStatus } from './status';
+import { status, Status, StatusError, raceWithStatus, waitForStatus } from './status';
 import { tabDataStore } from '../storage';
 
 const clickStart = () => {
@@ -29,48 +29,19 @@ const startSearch = async () => {
     // Wait for the status to be "Searching".
     // Using !== Status.Idle in the possible case of Idle -> Connected
     // todo: Timeout? TimeoutError
-    const waitForNotIdle = new Promise((resolve) => {
-        const changeListener = ({ detail: latest }: CustomEvent<Status>) => {
-            if (latest !== Status.Idle) {
-                resolve(undefined);
 
-                status.events.removeEventListener('change', changeListener);
-            }
-        };
-
-        status.events.addEventListener('change', changeListener);
-    });
+    const statusWaiter = waitForStatus((status) => status !== Status.Idle);
+    const waitForNotIdle = statusWaiter();
 
     // Ome.tv doesn't disable the "Start" button, even if it's not ready to use.
     // Rapidly click the "Start" button until no longer "idle".
     const interval = setInterval(() => {
         clickStart();
-    }, 1_000);
+        // Every 250ms for a snappy response
+    }, 250);
     await waitForNotIdle;
 
     clearInterval(interval);
-};
-
-// todo: Timeout?
-const waitForStatus = (predicate: (status: Status) => boolean) => () => {
-    if (predicate(status.latest)) return;
-
-    return new Promise((resolve) => {
-        const changeListener = ({ detail: latest }: CustomEvent<Status>) => {
-            if (!predicate(latest)) return;
-
-            status.events.removeEventListener('change', changeListener);
-            resolve(undefined);
-        };
-
-        status.events.addEventListener('change', changeListener);
-    });
-};
-
-const assertConnected = () => {
-    if (status.latest !== Status.Connected) {
-        throw new StatusError();
-    }
 };
 
 const sleep = (key: keyof Config, multiplier: number) => async () => {
@@ -97,22 +68,20 @@ const sendMessage = (value: string) => {
     );
 };
 
-// Handle status checks at the message level, so that the flow can be
-// cancelled right in the middle of the sequence.
-const messagePipeline = pipeline<string, void>(
-    // todo: Spintax support
-    sendMessage,
-    sleep('messageTimeoutSecs', 1_000)
-);
-
-const sendMessages = raceWithStatus(
-    async () => {
-        for (const message of messages.data!) {
-            await messagePipeline(message.content);
-        }
-    }, // Throw StatusError if the chat disconnects at any time.
+const messagePipeline = raceWithStatus(
+    pipeline<string, void>(
+        // todo: Spintax support
+        sendMessage,
+        sleep('messageTimeoutSecs', 1_000)
+    ),
     ({ detail: status }) => status !== Status.Connected
 );
+
+const sendMessages = async () => {
+    for (const message of messages.data!) {
+        await messagePipeline(message.content);
+    }
+};
 
 export class StoppedError extends Error {}
 
@@ -142,7 +111,7 @@ const checkStopTime = async () => {
 
 /**
  * Runs the message sequence once. Throws {@link StatusError} if the
- * sequence must be restarted due to a status change (disconnected on).
+ * sequence must be restarted due to a status change (disconnected).
  */
 export const sequence = raceWithStopped(
     pipeline(
@@ -151,12 +120,10 @@ export const sequence = raceWithStopped(
         startSearch,
         // Wait for "Searching" to end.
         waitForStatus((status) => status !== Status.Searching),
-        // Ensure connected to stranger.
-        assertConnected,
+        // Ensure connected to one stranger the whole time.
         // Wait pre-sequence timeout.
         raceWithStatus(sleep('startSequenceTimeoutSecs', 1_000), ({ detail: status }) => status !== Status.Connected),
-        // Ensure still connected.
-        assertConnected,
+        // Ensure connected to one stranger the whole time.
         // Send all messages.
         sendMessages,
         checkStopTime,

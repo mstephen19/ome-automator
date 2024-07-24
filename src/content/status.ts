@@ -70,3 +70,19 @@ export const raceWithStatus = raceWithEvent(StatusError)(
     'change',
     () => new CustomEvent('change', { detail: status.latest })
 );
+
+// todo: Timeout?
+export const waitForStatus = (predicate: (status: Status) => boolean) => () => {
+    if (predicate(status.latest)) return;
+
+    return new Promise((resolve) => {
+        const changeListener = ({ detail: latest }: CustomEvent<Status>) => {
+            if (!predicate(latest)) return;
+
+            status.events.removeEventListener('change', changeListener);
+            resolve(undefined);
+        };
+
+        status.events.addEventListener('change', changeListener);
+    });
+};

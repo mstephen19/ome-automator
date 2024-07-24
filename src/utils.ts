@@ -53,6 +53,8 @@ type LooseConstructor<T = Error> = new (...args: any[]) => T;
  *
  * With no provided predicate, the default will always return true.
  *
+ * The error will propagate naturally, as if it came from directly calling `operation()`.
+ *
  * Optionally pass an `init()` function to check the `predicate()` before registering a listener.
  *
  * Note: Will not abort the async operation, will only reject its wrapper with an error.
@@ -68,6 +70,7 @@ export const raceWithEvent =
     /**
      * The type of error to throw if the predicate returns true on an event
      */
+
 
         <ErrType extends Error>(Err: LooseConstructor<ErrType>) =>
         /**

@@ -31,6 +31,8 @@ export const chromeStorage = <Data>(storage: chrome.storage.StorageArea, key: st
 };
 
 /**
+ * {@link chromeStorage} subscriber.
+ *
  * Cache a readable copy of the {@link chromeStorage} API. Updates the cache when `onChange` fires.
  */
 export const memCache = <Data>(api: ReturnType<typeof chromeStorage<Data>>) => {
