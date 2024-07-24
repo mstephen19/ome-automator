@@ -42,8 +42,8 @@ export const memCache = <Data>(api: ReturnType<typeof chromeStorage<Data>>) => {
 
     return {
         init: async (defaultValue: Data) => {
-            // ! Not merging any newest config changes
-            // Not necessary, because Popup handles merges.
+            // Not merging any newest config changes
+            // Not necessary, because Popup handles merges. Must open popup to use script anyways.
             latest = (await api.read()) ?? null;
 
             if (latest === null) {

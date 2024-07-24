@@ -109,6 +109,9 @@ const TargetTabProvider = ({ children }: { children?: ReactNode }) => {
 
 export const TabContext = TargetTabContext;
 
+/**
+ * Provides the currently running tab, or an available Ome.tv tab to run in.
+ */
 export const TabProvider = ({ children }: { children?: ReactNode }) => (
     <TabDataProvider>
         <TargetTabProvider>{children}</TargetTabProvider>
