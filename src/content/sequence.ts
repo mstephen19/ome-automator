@@ -83,10 +83,14 @@ const sendMessages = async () => {
 };
 
 /**
- * Click stop & mark the tab as no longer running.
+ * Click stop, set empty chat input & mark the tab as no longer running.
  */
 export const resetToIdle = async () => {
-    clickStop();
+    const stop = elements.stopButton();
+    const input = elements.chatInput();
+
+    stop?.click();
+    if (input) input.value = '';
 
     await tabDataStore.write({ runningTab: null, startedUnixMs: null });
 };
@@ -123,8 +127,13 @@ const bypassShowFaceMessage = async () => {
 };
 
 /**
- * Runs the message sequence once. Throws {@link StatusError} if the
- * sequence must be restarted due to a status change (disconnected).
+ * Runs the message sequence once.
+ *
+ * Throws {@link StatusError} if the sequence must be restarted due to a status change (disconnected).
+ *
+ * Throws {@link StoppedError} if the sequence should stop gracefully.
+ *
+ * Throws {@link TimeoutError} if the sequence must be restarted due to a timeout (AKA retry).
  */
 const sequence = raceWithStopped(
     pipeline(
@@ -139,9 +148,8 @@ const sequence = raceWithStopped(
         // Ensure connected to one stranger the whole time.
         // Send all messages.
         sendMessages,
+        // Stop if running longer than stopAfterMins
         checkStopTime,
-        // todo: Send a message back to the popup
-        // todo: Completed sequences # count
         // Click "Next" (AKA "Start").
         clickStart
     )

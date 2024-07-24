@@ -20,9 +20,10 @@ async function main() {
         // Status is now needed, initialize it if not already.
         await status.init();
 
-        // Updates the store to let the popup know the script is no longer running.
+        // Updates the store to let the popup know the script is no longer running (unloading).
         window.addEventListener('beforeunload', resetToIdle);
 
+        // Sets the running tab - Propagates to the UI
         await tabDataStore.write({
             runningTab: tabId,
             startedUnixMs: Date.now(),
@@ -31,9 +32,8 @@ async function main() {
         try {
             await sequenceLoop();
         } catch (err) {
+            // ! Handling errors fairly silently here.
             resetToIdle();
-
-            // todo: Message UI - tab error. Refresh page.
             return;
         } finally {
             // No longer needed until "start" is called again.
@@ -43,6 +43,7 @@ async function main() {
         commands.events.addEventListener(Command.Start, startListener, { once: true });
     };
 
+    // Wait for "Start" button to be clicked.
     commands.events.addEventListener(Command.Start, startListener, { once: true });
 }
 
