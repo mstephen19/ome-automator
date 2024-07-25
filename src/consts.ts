@@ -3,6 +3,7 @@ import { AppData, Config, Message, TabData } from './types';
 export const defaultAppData: AppData = {
     messageSequenceOpen: false,
     settingsOpen: false,
+    helpOpen: false,
     theme: 'light',
 };
 

@@ -6,7 +6,7 @@ import { elements } from './elements';
 import { status, Status, raceWithStatus, waitForStatus } from './status';
 import { tabDataStore } from '../storage';
 import { StatusError, TimeoutError, StoppedError } from './errors';
-import { transforms } from './transforms';
+import { transforms } from '../transforms';
 
 const clickStart = () => {
     const start = elements.startButton()!;
@@ -88,6 +88,7 @@ const messagePipeline = raceWithStatus(
 
 const sendMessages = async () => {
     for (const message of messages.latest!) {
+        // todo: Don't wait messageTimeoutSecs after the last message
         await messagePipeline(message.content);
     }
 };

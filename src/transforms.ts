@@ -4,10 +4,10 @@ type TokenMap = {
 
 const tokenTags = (token: string) => ({ start: `{${token}}`, end: `{/${token}}` });
 
-const tokenRegex = /{\/?.+}/;
+const tagRegex = /{\/?.+}/;
 
 const tokenFromTag = (str: string) => {
-    if (!tokenRegex.test(str)) return null;
+    if (!tagRegex.test(str)) return null;
 
     const tagType = str[1] === '/' ? 'end' : 'start';
 
@@ -28,8 +28,8 @@ const matchesInString = (key: string, str: string) => {
 /**
  * Parse custom {block}blocks{/block} within a string & transform the content between tags..
  */
-const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tokens) => ({
-    validateAllBlocks: (input: string) => {
+const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tokens) => {
+    const validateAllBlocks = (input: string) => {
         return Object.keys(tokens).reduce(
             (acc, [token]) => {
                 const { start, end } = tokenTags(token);
@@ -47,8 +47,11 @@ const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tok
                 byToken: { [K in keyof Tokens]: boolean };
             }
         );
-    },
-    transformAllBlocks: (input: string) => {
+    };
+    const transformAllBlocks = (input: string) => {
+        // Don't transform non-token inputs at all
+        if (!tagRegex.test(input) || !validateAllBlocks(input)) input;
+
         const splitRegex = new RegExp(
             Object.keys(tokens).reduce(
                 // Split on the spaces surrounding {token} and {/token}
@@ -60,7 +63,7 @@ const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tok
         );
 
         const matches = input.split(splitRegex);
-        if (!matches?.length || !tokenRegex.test(input)) {
+        if (!matches?.length) {
             return input;
         }
 
@@ -82,8 +85,10 @@ const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tok
         );
 
         return final;
-    },
-});
+    };
+
+    return { validateAllBlocks, transformAllBlocks };
+};
 
 export const transforms = stringSyntaxBlocks({
     happy: { transformBlock: (block: string) => `✿🌼 😄 ${block} ☮️🌈 🌼✿` },

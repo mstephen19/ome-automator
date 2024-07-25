@@ -1,9 +1,9 @@
 import { Box, TextField } from '@mui/material';
 import { useState, useContext } from 'react';
-import { messageStore } from '../../storage';
-import { sanitize } from '../../utils';
+import { messageStore } from '../../../storage';
+import { sanitize } from '../../../utils';
 
-import { MessageSequenceContext } from '../context/MessageSequenceProvider';
+import { MessageSequenceContext } from '../../context/MessageSequenceProvider';
 
 export const AddMessageButton = () => {
     const messages = useContext(MessageSequenceContext);

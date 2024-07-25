@@ -1,10 +1,10 @@
 import { Box, Slider, TextField, Tooltip, Typography } from '@mui/material';
 import { ComponentProps, useContext } from 'react';
-import { ConfigContext } from '../context/ConfigProvider';
+import { ConfigContext } from '../../context/ConfigProvider';
 import InfoIcon from '@mui/icons-material/Info';
 
-import { Config } from '../../types';
-import { configStore } from '../../storage';
+import { Config } from '../../../types';
+import { configStore } from '../../../storage';
 
 const ConfigName = ({ name, tip, value, unit }: { name: string; tip: string; value?: number; unit: string }) => (
     <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>

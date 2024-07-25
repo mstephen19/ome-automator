@@ -1,18 +1,19 @@
 import { IconButton, List, ListItem, ListItemProps, ListItemText, TextField, Tooltip, styled } from '@mui/material';
 import React, { useEffect, useState, useContext, createContext } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { messageStore } from '../../storage';
-import { sanitize } from '../../utils';
-import { MessageSequenceContext } from '../context/MessageSequenceProvider';
+import { messageStore } from '../../../storage';
+import { sanitize } from '../../../utils';
+import { MessageSequenceContext } from '../../context/MessageSequenceProvider';
 
-import type { Message } from '../../types';
-import { TabDataContext } from '../context/TabProvider';
+import type { Message } from '../../../types';
+import { TabDataContext } from '../../context/TabProvider';
 
 const MessageListItem = styled(ListItem)({
     display: 'flex',
     gap: '10px',
 });
 
+// todo: transform syntax validation
 export const MessageItem = ({ message, ...props }: { message: Message } & ListItemProps) => {
     const { runningTab, startedUnixMs } = useContext(TabDataContext);
     const running = runningTab !== null && startedUnixMs !== null;
