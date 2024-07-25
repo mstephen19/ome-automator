@@ -5,6 +5,7 @@ import { resetToIdle, sequenceLoop } from './sequence';
 import { Command } from '../types';
 import { status } from './status';
 import { defaultConfig, defaultMessageSequence, defaultTabData } from '../consts';
+import { elements } from './elements';
 
 async function main() {
     // Initialize data
@@ -16,6 +17,12 @@ async function main() {
     const startListener = async ({ detail: tabId }: CustomEvent<number>) => {
         // Status is now needed, initialize it if not already.
         await status.init();
+
+        // If the login popup is open or there's an error, do nothing, but still listen for "Start" button clicks.
+        if (elements.loginPopup() || elements.errorPopup()) {
+            commands.events.addEventListener(Command.Start, startListener, { once: true });
+            return;
+        }
 
         // Updates the store to let the popup know the script is no longer running (unloading).
         window.addEventListener('beforeunload', resetToIdle);

@@ -8,6 +8,8 @@ enum Selector {
     Tip = 'div.message-bubble > span',
     // Shows up when camera is uncovered
     ShowFaceButton = '#overlay.visible #ShowFacePopup div.btn-main',
+    LoginPopup = '#LoginPopup.visible',
+    ErrorPopup = '#ErrorPopup.visible',
 }
 
 export const elements = {
@@ -16,4 +18,6 @@ export const elements = {
     chatInput: elementRetriever<HTMLInputElement>(Selector.ChatInput),
     tip: elementRetriever<HTMLSpanElement>(Selector.Tip),
     showFaceButton: elementRetriever<HTMLDivElement>(Selector.ShowFaceButton),
+    loginPopup: elementRetriever<HTMLDivElement>(Selector.LoginPopup),
+    errorPopup: elementRetriever<HTMLDivElement>(Selector.ErrorPopup),
 };

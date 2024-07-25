@@ -12,7 +12,10 @@
     },
     "incognito": "split",
     "permissions": ["storage", "tabs"],
-    "action": { "default_popup": "popup.html" },
+    "action": {
+        "default_title": "Ome.tv Automator - Controls",
+        "default_popup": "popup.html"
+    },
     "content_scripts": [
         {
             "matches": ["https://ome.tv/*"],
