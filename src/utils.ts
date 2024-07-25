@@ -11,7 +11,7 @@ export function pipeline<Input = undefined, Result = unknown>(...funcs: ((...arg
             const prev = await acc;
 
             return curr(prev);
-        }, Promise.resolve(input) as Promise<Input>) as Promise<Result>;
+        }, Promise.resolve(input) as Promise<Result>) as Promise<Result>;
 }
 
 export const elementRetriever =

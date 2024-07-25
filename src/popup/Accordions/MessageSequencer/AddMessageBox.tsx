@@ -4,9 +4,9 @@ import { messageStore } from '../../../storage';
 import { sanitize } from '../../../utils';
 
 import { MessageSequenceContext } from '../../context/MessageSequenceProvider';
-import { stringHasTag, transforms, Token } from '../../../transforms';
+import { transforms } from '../../../transforms';
 
-export const AddMessageButton = () => {
+export const AddMessageBox = () => {
     const messages = useContext(MessageSequenceContext);
 
     const [inputText, setInputText] = useState('');

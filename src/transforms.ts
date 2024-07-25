@@ -1,4 +1,4 @@
-export enum Token {
+enum Token {
     Spintax = 'spin',
     Reverse = 'rev',
     Happy = 'happy',
@@ -11,7 +11,7 @@ type TokenMap = {
 
 const tokenTags = (token: string) => ({ start: `{${token}}`, end: `{/${token}}` });
 
-export const stringHasTag = (str: string, tokens: string[]) => {
+const stringHasTag = (str: string, tokens: string[]) => {
     const tagRegex = new RegExp(
         tokens.reduce((acc, token, index) => acc + `${index === 0 ? '' : '|'}{\\\/?${token}}`, ''),
         'i'

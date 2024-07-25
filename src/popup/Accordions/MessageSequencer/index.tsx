@@ -1,10 +1,10 @@
-import { AddMessageButton } from './AddMessageButton';
+import { AddMessageBox } from './AddMessageBox';
 import { MessageList } from './MessageList';
 import { memo } from 'react';
 
 export const MessageSequencer = memo(() => (
     <>
-        <AddMessageButton />
+        <AddMessageBox />
 
         <MessageList />
     </>
