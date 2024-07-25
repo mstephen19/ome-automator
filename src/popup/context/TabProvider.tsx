@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { tabDataStore } from '../../storage';
 import { storeProvider } from './StoreProvider';
 import { defaultTabData } from '../../consts';
+import { TabData } from '../../types';
+import { findRelevantTab, urlIsRelevant } from '../../tabs';
 
 export const TabDataContext = createContext(defaultTabData);
 
@@ -27,53 +29,41 @@ const TargetTabProvider = ({ children }: { children?: ReactNode }) => {
     const [tab, setTab] = useState<chrome.tabs.Tab | null>(null);
 
     useEffect(() => {
-        // todo: cleanup
-        const init = async () => {
-            console.log(tabData);
+        const initializeTab = async () => {
+            const relevantTab = await findRelevantTab(tabData);
 
-            // If there is a tab marked as running already, check it.
-            if (tabData.runningTab !== null) {
-                const tab = await chrome.tabs.get(tabData.runningTab);
-
-                // Still exists and is on Ome.tv, it's still valid - pick up.
-                if (tab && tab.url?.startsWith('https://ome.tv')) {
-                    console.log('Found previous tab');
-                    setTab(tab);
-                    return;
-                }
-
-                // If the runningTab is no longer on Ome.tv, reset state.
-                await tabDataStore.write(defaultTabData);
-            }
-
-            const tabs = await chrome.tabs.query({ url: 'https://ome.tv/*', currentWindow: true });
-            // If there are multiple matching tabs and one is active, use that one.
-            // Otherwise, use the first one.
-            const target = tabs.reduce((prev, curr) => (curr.active ? curr : prev), tabs[0]);
-
-            setTab(target || null);
+            setTab((prev) => {
+                // If the relevant tab is already set, don't change
+                // the state value.
+                if (prev?.id === relevantTab?.id) return prev;
+                return relevantTab;
+            });
         };
 
-        init();
-    }, []);
+        initializeTab();
+    }, [tabData]);
 
-    // todo: cleanup
+    // Each time "tab"'s object reference changes, add listeners:
+    // Found a tab:
+    //  Listen for the tab closing/exiting Ome.tv. React by reflecting the tab's change with setTab().
+    // No tab:
+    //  Listen for new Ome.tv tabs.
     useEffect(() => {
-        if (tab !== null) {
-            const tabUpdatedListener = (tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-                if (tabId !== tab.id) return;
+        const tabFound = tab !== null;
 
-                if (changeInfo.url && !changeInfo.url.startsWith('https://ome.tv')) {
+        if (tabFound) {
+            // Listen for URL changes in the tab
+            const tabUpdatedListener = (tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
+                if (tabId === tab.id && changeInfo.url !== undefined && !urlIsRelevant(changeInfo.url)) {
                     setTab(null);
                 }
             };
-
             chrome.tabs.onUpdated.addListener(tabUpdatedListener);
 
+            // Listen for tab closing
             const tabRemovedListener = (tabId: number) => {
                 if (tabId === tab.id) setTab(null);
             };
-
             chrome.tabs.onRemoved.addListener(tabRemovedListener);
 
             return () => {
@@ -82,20 +72,18 @@ const TargetTabProvider = ({ children }: { children?: ReactNode }) => {
             };
         }
 
+        // Listen for url changes on other tabs that may be relevant ("https://ome.tv")
         const tabUpdatedListener = (tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-            if (tabId !== tab.id) return;
-
-            if (changeInfo.url && changeInfo.url.startsWith('https://ome.tv')) {
+            if (tabId === tab.id && changeInfo.url && urlIsRelevant(changeInfo.url)) {
                 setTab(tab);
             }
         };
-
         chrome.tabs.onUpdated.addListener(tabUpdatedListener);
 
+        // Listen for new tabs created with the URL already set (e.g. external link with target="_blank")
         const tabCreatedListener = (tab: chrome.tabs.Tab) => {
-            if (tab.url?.startsWith('https://ome.tv')) setTab(tab);
+            if (urlIsRelevant(tab.url)) setTab(tab);
         };
-
         chrome.tabs.onCreated.addListener(tabCreatedListener);
 
         return () => {
