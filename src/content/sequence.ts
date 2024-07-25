@@ -6,6 +6,7 @@ import { elements } from './elements';
 import { status, Status, raceWithStatus, waitForStatus } from './status';
 import { tabDataStore } from '../storage';
 import { StatusError, TimeoutError, StoppedError } from './errors';
+import { transforms } from './transforms';
 
 const clickStart = () => {
     const start = elements.startButton()!;
@@ -81,11 +82,7 @@ const checkStopTime = async () => {
 };
 
 const messagePipeline = raceWithStatus(
-    pipeline<string, void>(
-        // todo: Spintax support
-        sendMessage,
-        sleep('messageTimeoutSecs', 1_000)
-    ),
+    pipeline<string, void>(transforms.transformAllBlocks, sendMessage, sleep('messageTimeoutSecs', 1_000)),
     ({ detail: status }) => status !== Status.Connected
 );
 
