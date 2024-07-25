@@ -12,10 +12,7 @@ type TokenMap = {
 const tokenTags = (token: string) => ({ start: `{${token}}`, end: `{/${token}}` });
 
 const stringHasTag = (str: string, tokens: string[]) => {
-    const tagRegex = new RegExp(
-        tokens.reduce((acc, token, index) => acc + `${index === 0 ? '' : '|'}{\\\/?${token}}`, ''),
-        'i'
-    );
+    const tagRegex = new RegExp(tokens.reduce((acc, token, index) => acc + `${index === 0 ? '' : '|'}{\\\/?${token}}`, ''));
 
     return tagRegex.test(str);
 };
@@ -35,14 +32,14 @@ const tokenFromTag = (str: string, tokens: string[]) => {
  * Number of times a substring appears in a string (case insensitive).
  */
 const matchesInString = (key: string, str: string) => {
-    const keyRegex = new RegExp(key, 'i');
+    const keyRegex = new RegExp(key);
     return str.match(keyRegex)?.length ?? 0;
 };
 
 /**
  * Parse custom {block}blocks{/block} within a string & transform the content between tags..
  */
-const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tokens) => {
+export const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tokens) => {
     const tokenList = Object.keys(tokens);
 
     const validateAllBlocks = (input: string) => {
@@ -74,8 +71,7 @@ const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tok
                 (final, token, index) =>
                     final + `${index === 0 ? '' : '|'}(?={${token}})|(?={\\\/${token}})|(?<={${token}})|(?<={\\\/${token}})`,
                 ''
-            ),
-            'i'
+            )
         );
 
         const matches = input.split(splitRegex);
