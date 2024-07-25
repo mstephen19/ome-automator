@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useState, type Context } from 'react';
 import type { chromeStorage } from '../../storage';
+import { CircularProgress } from '@mui/material';
 
 /**
  * Creates a generic provider for use with a {@link chromeStorage} adapter.
@@ -27,6 +28,7 @@ export function storeProvider<Data>({
     merge?: (fromStore: Data, defaultValue: Data) => Data;
 }) {
     return ({ children }: { children?: ReactNode }) => {
+        const [initialized, setInitialized] = useState(false);
         const [data, setData] = useState<Data>(defaultValue);
 
         useEffect(() => {
@@ -41,13 +43,18 @@ export function storeProvider<Data>({
                         // Write the latest merged in default data back to the store.
                         await store.write(merged);
                         setData(merged);
+
+                        setInitialized(true);
                         return;
                     }
 
                     setData(pulledData);
                 }
-                // If there is no data in the store, initialize it with the default value.
+                // If there is no data in the store, initialize it with the default value
+                // State is already initialized with this.
                 else await store.write(defaultValue);
+
+                setInitialized(true);
             };
 
             hydrateStore();
@@ -60,6 +67,7 @@ export function storeProvider<Data>({
             return removeListener;
         }, []);
 
-        return <context.Provider value={data}>{children}</context.Provider>;
+        // Don't render until the data has been initialized.
+        return initialized ? <context.Provider value={data}>{children}</context.Provider> : null;
     };
 }
