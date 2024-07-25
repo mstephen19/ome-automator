@@ -1,20 +1,22 @@
 {
     "manifest_version": 3,
     "name": "Ome.tv Automator",
-    "description": "Spam chat sequences to Ome.tv connections.",
+    "short_name": "Auto-Ome.tv",
     "version": "1.0.0",
-    "action": { "default_popup": "index.html" },
-    "permissions": ["storage", "tabs"],
-    "content_scripts": [
-        {
-            "matches": ["https://ome.tv/*"],
-            "js": ["src/content/index.ts"]
-        }
-    ],
+    "description": "Reliably deliver message sequences to Ome.tv connections.",
     "icons": {
         "16": "public/icon16.png",
         "32": "public/icon32.png",
         "48": "public/icon48.png",
         "128": "public/icon128.png"
-    }
+    },
+    "incognito": "split",
+    "permissions": ["storage", "tabs"],
+    "action": { "default_popup": "popup.html" },
+    "content_scripts": [
+        {
+            "matches": ["https://ome.tv/*"],
+            "js": ["src/content/index.ts"]
+        }
+    ]
 }

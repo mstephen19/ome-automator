@@ -64,28 +64,26 @@ export const Help = () => {
                         <List>
                             <ListItem>
                                 <ListItemText
-                                    primaryTypographyProps={{ fontSize: 12 }}
-                                    primary={<code>{'{spin}hello | hi | hey | heyo{/spin}'}</code>}
+                                    primary={<code>{'{spin}hello | hi | hey{/spin}!'}</code>}
+                                    secondary='Result will be one of "hello!", "hi!", "hey!" at random.'
                                 />
-                            </ListItem>
-
-                            <ListItem>
-                                <ListItemText primaryTypographyProps={{ fontSize: 12 }} primary={<code>{'{rev}eip elppa{/rev}'}</code>} />
-                            </ListItem>
-
-                            <ListItem>
-                                <ListItemText primaryTypographyProps={{ fontSize: 12 }} primary={<code>{'{happy}Yay!!{/happy}'}</code>} />
                             </ListItem>
 
                             <ListItem>
                                 <ListItemText
-                                    primaryTypographyProps={{ fontSize: 12 }}
-                                    primary={<code>{'{angry}not happy{/angry}'}</code>}
+                                    primary={<code>{'I want some {rev}apple pie{/rev}.'}</code>}
+                                    secondary='Result: "I want some eip elppa."'
                                 />
                             </ListItem>
-                        </List>
 
-                        <Typography>Try it out!</Typography>
+                            <ListItem>
+                                <ListItemText primary={<code>{'{happy}Yay!!{/happy}'}</code>} secondary='Try it out!' />
+                            </ListItem>
+
+                            <ListItem>
+                                <ListItemText primary={<code>{'{angry}not happy{/angry}'}</code>} secondary='Try it out!' />
+                            </ListItem>
+                        </List>
                     </>
                 }
             />
@@ -136,6 +134,7 @@ export const Help = () => {
                 content={
                     <Typography>
                         Submit any bug reports or feature requests <Link href='https://github.com/mstephen19/ome-automator'>on Github</Link>
+                        .
                     </Typography>
                 }
             />

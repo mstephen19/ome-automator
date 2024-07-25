@@ -68,6 +68,7 @@ export function storeProvider<Data>({
         }, []);
 
         // Don't render until the data has been initialized.
+        // ! If loading from the store wasn't practically instant, would want to display a loading component here.
         return initialized ? <context.Provider value={data}>{children}</context.Provider> : null;
     };
 }
