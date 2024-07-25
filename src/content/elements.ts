@@ -6,7 +6,7 @@ enum Selector {
     ChatInput = '#chat-text',
     // Used for "Status" (data-tr property)
     Tip = 'div.message-bubble > span',
-    // Shows up when camera is uncovered
+    // Shows up when camera is covered
     ShowFaceButton = '#overlay.visible #ShowFacePopup div.btn-main',
     LoginPopup = '#LoginPopup.visible',
     ErrorPopup = '#ErrorPopup.visible',

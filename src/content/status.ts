@@ -56,6 +56,7 @@ const statusListener = () => {
         // Wait for the "tip" element to be present
         await pollPredicate(500, () => Boolean(elements.tip()));
 
+        // Start listening on the tip element
         observer.observe(elements.tip()!, {
             attributes: true,
             attributeFilter: ['data-tr'],

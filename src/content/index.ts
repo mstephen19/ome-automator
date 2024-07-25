@@ -15,14 +15,14 @@ async function main() {
     await tabData.init(defaultTabData);
 
     const startListener = async ({ detail: tabId }: CustomEvent<number>) => {
-        // Status is now needed, initialize it if not already.
-        await status.init();
-
         // If the login popup is open or there's an error, do nothing, but still listen for "Start" button clicks.
         if (elements.loginPopup() || elements.errorPopup()) {
             commands.events.addEventListener(Command.Start, startListener, { once: true });
             return;
         }
+
+        // Status is now needed, initialize it if not already.
+        await status.init();
 
         // Updates the store to let the popup know the script is no longer running (unloading).
         window.addEventListener('beforeunload', resetToIdle);
@@ -38,6 +38,7 @@ async function main() {
         } catch (err) {
             // ! Handling errors fairly silently here.
             resetToIdle();
+
             return;
         } finally {
             // No longer needed until "start" is called again.

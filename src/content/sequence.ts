@@ -35,10 +35,7 @@ const startSearch = async () => {
 
     // Ome.tv doesn't disable the "Start" button, even if it's not ready to use.
     // Rapidly click the "Start" button until no longer "idle".
-    const interval = setInterval(() => {
-        clickStart();
-        // Every 250ms for a snappy response
-    }, 250);
+    const interval = setInterval(clickStart, 250);
     await waitForNotIdle;
 
     clearInterval(interval);
