@@ -2,11 +2,13 @@ import { Command, CommandMessage } from '../types';
 import { TypedEventTarget } from '../utils';
 import { elements } from './elements';
 
-const tabCommandRouter = () => {
+export const tabCommandRouter = () => {
     const events = new TypedEventTarget<{
         [Command.Start]: CustomEvent<number>;
         [Command.Stop]: CustomEvent<number>;
     }>();
+
+    console.log('tabCommandRouter', events);
 
     chrome.runtime.onMessage.addListener(({ extensionId, command, tabId }: CommandMessage) => {
         if (extensionId !== chrome.runtime.id) return;

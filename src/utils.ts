@@ -17,7 +17,7 @@ export function pipeline<Input = undefined, Result = unknown>(...funcs: ((...arg
 export const elementRetriever =
     <T extends Element>(selector: string) =>
     () =>
-        document.querySelector(selector) as T | undefined;
+        globalThis.document && (document.querySelector(selector) as T | undefined);
 
 export class TypedEventTarget<EventMap = Record<string, Event>> extends EventTarget {
     addEventListener<K extends keyof EventMap>(

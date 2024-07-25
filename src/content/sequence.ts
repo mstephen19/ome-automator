@@ -13,11 +13,6 @@ const clickStart = () => {
     start.click();
 };
 
-const clickStop = () => {
-    const stop = elements.stopButton()!;
-    stop.click();
-};
-
 /**
  * If {@link Status.Idle}, rapidly click the start button until the status changes
  * to something other than {@link Status.Idle}.

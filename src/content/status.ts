@@ -8,7 +8,7 @@ export const enum Status {
     Connected = 'connected',
 }
 
-const tipStatusMap: Record<string, Status> = {
+export const tipStatusMap: Record<string, Status> = {
     rules: Status.Idle,
     searching: Status.Searching,
     connection: Status.Connected,
