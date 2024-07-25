@@ -56,7 +56,7 @@ export const Help = () => {
                 content={
                     <>
                         <Typography>
-                            Anything between an opening tag {'{tag}'} and closing tag {'{/tag}'} will be transformed accordingly.
+                            Anything between an opening {'{tag}'} and closing {'{/tag}'} will be transformed accordingly.
                         </Typography>
 
                         <Typography fontWeight='bold'>Examples:</Typography>

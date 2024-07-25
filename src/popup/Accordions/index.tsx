@@ -27,7 +27,7 @@ export const Accordions = () => {
 
             <Divider />
 
-            <AccordionItem dataKey='helpOpen' title='Help & Info' maxHeight='375px'>
+            <AccordionItem dataKey='helpOpen' title='Help, Info & Terms' maxHeight='375px'>
                 <Help />
             </AccordionItem>
         </>

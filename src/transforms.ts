@@ -1,13 +1,27 @@
+export enum Token {
+    Spintax = 'spin',
+    Reverse = 'rev',
+    Happy = 'happy',
+    Angry = 'angry',
+}
+
 type TokenMap = {
     transformBlock: (block: string) => string;
 };
 
 const tokenTags = (token: string) => ({ start: `{${token}}`, end: `{/${token}}` });
 
-const tagRegex = /{\/?.+}/;
+export const stringHasTag = (str: string, tokens: string[]) => {
+    const tagRegex = new RegExp(
+        tokens.reduce((acc, token, index) => acc + `${index === 0 ? '' : '|'}{\\\/?${token}}`, ''),
+        'i'
+    );
 
-const tokenFromTag = (str: string) => {
-    if (!tagRegex.test(str)) return null;
+    return tagRegex.test(str);
+};
+
+const tokenFromTag = (str: string, tokens: string[]) => {
+    if (!stringHasTag(str, tokens)) return null;
 
     const tagType = str[1] === '/' ? 'end' : 'start';
 
@@ -29,9 +43,11 @@ const matchesInString = (key: string, str: string) => {
  * Parse custom {block}blocks{/block} within a string & transform the content between tags..
  */
 const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tokens) => {
+    const tokenList = Object.keys(tokens);
+
     const validateAllBlocks = (input: string) => {
         return Object.keys(tokens).reduce(
-            (acc, [token]) => {
+            (acc, token) => {
                 const { start, end } = tokenTags(token);
 
                 const tokenOk = matchesInString(start, input) === matchesInString(end, input);
@@ -50,7 +66,7 @@ const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tok
     };
     const transformAllBlocks = (input: string) => {
         // Don't transform non-token inputs at all
-        if (!tagRegex.test(input) || !validateAllBlocks(input)) input;
+        if (!stringHasTag(input, tokenList) || !validateAllBlocks(input)) input;
 
         const splitRegex = new RegExp(
             Object.keys(tokens).reduce(
@@ -69,7 +85,7 @@ const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tok
 
         const { final } = matches.reduce(
             (acc, segment) => {
-                const parsedToken = tokenFromTag(segment);
+                const parsedToken = tokenFromTag(segment, tokenList);
 
                 if (parsedToken !== null && parsedToken.token in tokens) {
                     acc.currentToken = parsedToken.tagType === 'start' ? (parsedToken.token as keyof Tokens) : null;
@@ -91,10 +107,10 @@ const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tok
 };
 
 export const transforms = stringSyntaxBlocks({
-    happy: { transformBlock: (block: string) => `✿🌼 😄 ${block} ☮️🌈 🌼✿` },
-    angry: { transformBlock: (block: string) => `😡😡 ${block.toUpperCase()}!!!! 😡` },
-    rev: { transformBlock: (block: string) => block.split('').reduceRight((acc, char) => acc + char, '') },
-    spin: {
+    [Token.Happy]: { transformBlock: (block: string) => `✿🌼 😄 ${block} ☮️🌈 🌼✿` },
+    [Token.Angry]: { transformBlock: (block: string) => `😡😡 ${block.toUpperCase()}!!!! 😡` },
+    [Token.Reverse]: { transformBlock: (block: string) => block.split('').reduceRight((acc, char) => acc + char, '') },
+    [Token.Spintax]: {
         transformBlock: (block) => {
             const options = block.split('|');
             return options[Math.floor(Math.random() * options.length)];

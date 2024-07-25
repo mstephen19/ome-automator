@@ -13,7 +13,6 @@ const MessageListItem = styled(ListItem)({
     gap: '10px',
 });
 
-// todo: transform syntax validation
 export const MessageItem = ({ message, ...props }: { message: Message } & ListItemProps) => {
     const { runningTab, startedUnixMs } = useContext(TabDataContext);
     const running = runningTab !== null && startedUnixMs !== null;
