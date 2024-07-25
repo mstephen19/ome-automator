@@ -1,12 +1,13 @@
 import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import { Box, IconButton, Paper, styled, Tooltip, Typography } from '@mui/material';
-import { MessageSequenceContext } from './context/MessageSequenceProvider';
-import { useContext, useEffect, memo, useState } from 'react';
-import { TabContext, TabDataContext } from './context/TabProvider';
+import { MessageSequenceContext } from '../context/MessageSequenceProvider';
+import { useContext } from 'react';
+import { TabContext, TabDataContext } from '../context/TabProvider';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
-import { Command } from '../types';
-import { activateTab, sendTabCommand } from '../tabs';
+import { Command } from '../../types';
+import { activateTab, sendTabCommand } from '../../tabs';
+import { StopWatch } from './StopWatch';
 
 const FlexContainer = styled(Box)({
     display: 'flex',
@@ -15,39 +16,6 @@ const FlexContainer = styled(Box)({
 });
 
 const InfoContainer = styled(Paper)({ padding: '5px', borderWidth: '2px', display: 'flex', gap: '10px', alignItems: 'center' });
-
-const formatDuration = (ms: number) => {
-    const totalSeconds = Math.floor(ms / 1_000);
-    const hours = Math.floor(totalSeconds / 3_600);
-    const minutes = Math.floor((totalSeconds % 3_600) / 60);
-    const seconds = totalSeconds % 60;
-
-    const pad = (num: number) => num.toString().padStart(2, '0');
-
-    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-};
-
-const Stopwatch = memo(({ started }: { started: number | null }) => {
-    const [diff, setDiff] = useState<number>(started === null ? 0 : Date.now() - started);
-
-    useEffect(() => {
-        setDiff(started === null ? 0 : Date.now() - started), 1_000;
-
-        const interval = setInterval(() => setDiff(started === null ? 0 : Date.now() - started), 1_000);
-
-        return () => clearInterval(interval);
-    }, [started]);
-
-    return (
-        <>
-            <Typography fontSize='1rem' fontStyle='italic'>
-                Elapsed Time:
-            </Typography>
-
-            <Typography fontSize='1.75rem'>{formatDuration(diff)}</Typography>
-        </>
-    );
-});
 
 /**
  * Uses {@link MessageSequenceContext}
@@ -103,7 +71,7 @@ export const Controls = () => {
                 </FlexContainer>
 
                 <FlexContainer sx={{ width: '50%', gap: '10px', flexDirection: 'column' }}>
-                    <Stopwatch started={startedUnixMs} />
+                    <StopWatch started={startedUnixMs} />
                 </FlexContainer>
             </Box>
         </Box>
