@@ -26,7 +26,7 @@ export const AccordionItem = ({
     maxHeight,
     children,
 }: {
-    dataKey: Exclude<keyof AppData, 'theme'>;
+    dataKey: Exclude<keyof AppData, 'theme' | 'addMessageText'>;
     title: string;
     avatar?: string;
     maxHeight?: string;
@@ -39,11 +39,7 @@ export const AccordionItem = ({
     };
 
     return (
-        <Accordion
-            disableGutters
-            defaultExpanded={appData[dataKey]}
-            expanded={appData[dataKey]}
-            onChange={(_, expanded) => handleExpand(expanded)}>
+        <Accordion disableGutters expanded={appData[dataKey]} onChange={(_, expanded) => handleExpand(expanded)}>
             <AccordionTitle expandIcon={<ExpandMoreIcon />}>
                 <Typography>{title}</Typography>
 
