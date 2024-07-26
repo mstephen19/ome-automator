@@ -24,7 +24,7 @@ export const sendTabCommand = async (tab: chrome.tabs.Tab, command: Command) =>
         tabId: tab.id!,
     } as CommandMessage);
 
-export const urlIsRelevant = (url: string | undefined) => Boolean(url && /^https?:\/\/ome\.tv/i.test(url));
+export const urlIsRelevant = (url: string | undefined) => Boolean(url && /^https:\/\/ome\.tv/i.test(url));
 
 /**
  * Find the Ome.tv tab that is either:

@@ -8,7 +8,7 @@ export const enum SyncStorageKey {
 }
 
 /**
- * Make & listen for changes on a single key within a {@link chrome.storage.StorageArea}.
+ * Make & listen for changes on a single key within a {@link chrome.storage}.StorageArea.
  */
 export const chromeStorage = <Data>(storage: chrome.storage.StorageArea, key: string) => {
     return {
@@ -59,7 +59,7 @@ export const memCache = <Data>(api: ReturnType<typeof chromeStorage<Data>>) => {
     };
 };
 
-export const messageStore = chromeStorage<Message[]>(chrome.storage.sync, SyncStorageKey.MessageSequence);
-export const configStore = chromeStorage<Config>(chrome.storage.sync, SyncStorageKey.Config);
-export const appDataStore = chromeStorage<AppData>(chrome.storage.sync, SyncStorageKey.AppData);
-export const tabDataStore = chromeStorage<TabData>(chrome.storage.sync, SyncStorageKey.TabData);
+export const messageStore = chromeStorage<Message[]>(chrome.storage.local, SyncStorageKey.MessageSequence);
+export const configStore = chromeStorage<Config>(chrome.storage.local, SyncStorageKey.Config);
+export const appDataStore = chromeStorage<AppData>(chrome.storage.local, SyncStorageKey.AppData);
+export const tabDataStore = chromeStorage<TabData>(chrome.storage.local, SyncStorageKey.TabData);
