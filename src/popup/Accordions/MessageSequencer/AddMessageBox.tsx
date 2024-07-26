@@ -1,5 +1,5 @@
-import { Box, TextField } from '@mui/material';
-import { useState, useContext, useCallback } from 'react';
+import { TextField } from '@mui/material';
+import { useState, useContext } from 'react';
 import { appDataStore, messageStore } from '../../../storage';
 import { sanitize } from '../../../utils';
 
@@ -17,7 +17,7 @@ export const AddMessageBox = () => {
     const [validationError, setValidationError] = useState('');
     const showError = Boolean(validationError);
 
-    const handleAddMessage = useCallback(async (unsanitized: string) => {
+    const handleAddMessage = async (unsanitized: string) => {
         setLoading(true);
 
         const id = crypto.randomUUID();
@@ -42,7 +42,7 @@ export const AddMessageBox = () => {
 
         setValidationError('');
         setLoading(false);
-    }, []);
+    };
 
     return (
         <TextField
