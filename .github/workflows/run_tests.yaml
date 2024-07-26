@@ -1,0 +1,17 @@
+name: Run Tests
+
+on:
+    push:
+
+jobs:
+    run_tests:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+            - name: Yarn Install
+              run: yarn install
+            - name: Run Test Script
+              run: yarn test
