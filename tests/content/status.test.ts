@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { observerMock } from '../setup';
+import { observerMock } from '../_setup';
 import { Status, status, tipStatusMap } from '../../src/content/status';
 
 const mockStatusChange = (attribute: 'rules' | 'connection' | 'searching') => {

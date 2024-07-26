@@ -1,6 +1,7 @@
 import { AppData, Config, Message, TabData } from './types';
 
 export const defaultAppData: AppData = {
+    addMessageText: '',
     messageSequenceOpen: false,
     settingsOpen: false,
     helpOpen: false,

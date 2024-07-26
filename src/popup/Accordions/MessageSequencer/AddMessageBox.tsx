@@ -1,21 +1,23 @@
 import { Box, TextField } from '@mui/material';
-import { useState, useContext } from 'react';
-import { messageStore } from '../../../storage';
+import { useState, useContext, useCallback } from 'react';
+import { appDataStore, messageStore } from '../../../storage';
 import { sanitize } from '../../../utils';
 
 import { MessageSequenceContext } from '../../context/MessageSequenceProvider';
 import { transforms } from '../../../transforms';
+import { AppDataContext } from '../../context/AppDataProvider';
 
 export const AddMessageBox = () => {
     const messages = useContext(MessageSequenceContext);
+    const appData = useContext(AppDataContext);
 
-    const [inputText, setInputText] = useState('');
+    // const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(false);
 
     const [validationError, setValidationError] = useState('');
     const showError = Boolean(validationError);
 
-    const handleAddMessage = async (unsanitized: string) => {
+    const handleAddMessage = useCallback(async (unsanitized: string) => {
         setLoading(true);
 
         const id = crypto.randomUUID();
@@ -31,17 +33,16 @@ export const AddMessageBox = () => {
 
             setValidationError(`Syntax error with the following token(s): ${tokensWithErrors.join(', ')}`);
             setLoading(false);
-
             return;
         }
 
-        // Add the message to the end
-        await messageStore.write([...messages, { id, content }]);
+        // Add the message to the end of the list
+        // Clear out the addMessageText
+        await Promise.all([messageStore.write([...messages, { id, content }]), appDataStore.write({ ...appData, addMessageText: '' })]);
 
         setValidationError('');
-        setInputText('');
         setLoading(false);
-    };
+    }, []);
 
     return (
         <TextField
@@ -53,15 +54,15 @@ export const AddMessageBox = () => {
             placeholder='Hello, how are you?'
             onKeyDown={(e) => {
                 // Allow pressing Enter + Shift to create new lines.
-                if (!loading && e.key === 'Enter' && !e.shiftKey && inputText.trim()) {
+                if (!loading && e.key === 'Enter' && !e.shiftKey && appData.addMessageText.trim()) {
                     e.preventDefault();
 
-                    handleAddMessage(inputText);
+                    handleAddMessage(appData.addMessageText);
                 }
             }}
-            value={inputText}
-            // Sanitize as the user types
-            onChange={(e) => setInputText(e.target.value)}
+            value={appData.addMessageText}
+            // ? Store the latest text value in the data store - seamless through popup reloads
+            onChange={(e) => appDataStore.write({ ...appData, addMessageText: e.target.value })}
             helperText={showError ? validationError : 'Press "Enter" to add your message to the sequence.'}
             error={showError}
             // sx={{ position: 'sticky', top: 0 }}

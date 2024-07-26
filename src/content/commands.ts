@@ -8,8 +8,6 @@ export const tabCommandRouter = () => {
         [Command.Stop]: CustomEvent<number>;
     }>();
 
-    console.log('tabCommandRouter', events);
-
     chrome.runtime.onMessage.addListener(({ extensionId, command, tabId }: CommandMessage) => {
         if (extensionId !== chrome.runtime.id) return;
 

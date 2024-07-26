@@ -7,6 +7,17 @@ export const chromeTabMessages = eventMock<CommandMessage>();
 export const observerMock = eventMock<MutationRecord[]>();
 export const chromeStorageMessages = eventMock<Record<string, any>>();
 
+vi.stubGlobal(
+    'CustomEvent',
+    class Stub extends Event {
+        constructor(type: any, data: any) {
+            super(type);
+
+            (this as any).detail = data?.detail;
+        }
+    }
+);
+
 vi.stubGlobal('MutationObserver', observerMock.addListener);
 
 vi.stubGlobal('chrome', {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { chromeStorage } from '../src/storage';
-import { chromeStorageMessages } from './setup';
+import { chromeStorageMessages } from './_setup';
 
 describe('Chrome Storage Wrapper', () => {
     const testStorage = chromeStorage(chrome.storage.local, 'test');

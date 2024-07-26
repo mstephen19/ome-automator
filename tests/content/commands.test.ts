@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { chromeTabMessages } from '../setup';
+import { chromeTabMessages } from '../_setup';
 
 import { TEST_EXTENSION_ID } from './utils';
 import { commands } from '../../src/content/commands';

@@ -42,7 +42,7 @@ describe('Race With Event', () => {
             () => true
         )();
 
-        testEvents.dispatchEvent(new Event('test'));
+        testEvents.dispatchEvent(new CustomEvent('test'));
 
         expect(promise).rejects.toBeInstanceOf(TestError);
     });
@@ -56,7 +56,7 @@ describe('Race With Event', () => {
             () => false
         )();
 
-        testEvents.dispatchEvent(new Event('test'));
+        testEvents.dispatchEvent(new CustomEvent('test'));
 
         expect(promise).resolves.toBe(123);
     });

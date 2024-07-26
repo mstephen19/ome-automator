@@ -23,6 +23,7 @@ export type Config = {
 };
 
 export type AppData = {
+    addMessageText: string;
     messageSequenceOpen: boolean;
     settingsOpen: boolean;
     helpOpen: boolean;
