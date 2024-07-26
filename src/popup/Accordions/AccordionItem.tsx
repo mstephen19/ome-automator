@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Avatar, Divider, styled, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Avatar, Chip, Divider, styled, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { type ReactNode, useContext } from 'react';
 import { AppDataContext } from '../context/AppDataProvider';
@@ -22,13 +22,13 @@ const AccordionTitleAvatar = styled(Avatar)({
 export const AccordionItem = ({
     dataKey,
     title,
-    avatar,
+    chip,
     maxHeight,
     children,
 }: {
     dataKey: Exclude<keyof AppData, 'theme' | 'addMessageText'>;
     title: string;
-    avatar?: string;
+    chip?: string;
     maxHeight?: string;
     children: ReactNode;
 }) => {
@@ -43,7 +43,7 @@ export const AccordionItem = ({
             <AccordionTitle expandIcon={<ExpandMoreIcon />}>
                 <Typography>{title}</Typography>
 
-                {avatar && <AccordionTitleAvatar>{avatar}</AccordionTitleAvatar>}
+                {chip && <Chip size='small' label={chip} />}
             </AccordionTitle>
 
             <AccordionDetails sx={{ maxHeight, overflowY: 'scroll' }}>{children}</AccordionDetails>

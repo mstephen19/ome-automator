@@ -8,12 +8,14 @@ import { AccordionItem } from './AccordionItem';
 import { Divider } from '@mui/material';
 import { Help } from './Help';
 
+const extensionVersion = chrome.runtime.getManifest().version;
+
 export const Accordions = () => {
     const messages = useContext(MessageSequenceContext);
 
     return (
         <>
-            <AccordionItem dataKey='messageSequenceOpen' title='Message Sequence' avatar={messages.length.toString()} maxHeight='375px'>
+            <AccordionItem dataKey='messageSequenceOpen' title='Message Sequence' chip={messages.length.toString()} maxHeight='375px'>
                 <MessageSequencer />
             </AccordionItem>
 
@@ -27,7 +29,7 @@ export const Accordions = () => {
 
             <Divider />
 
-            <AccordionItem dataKey='helpOpen' title='Help, Info & Terms' maxHeight='375px'>
+            <AccordionItem dataKey='helpOpen' title='Help, Info & Terms' maxHeight='375px' chip={`v${extensionVersion}`}>
                 <Help />
             </AccordionItem>
         </>
