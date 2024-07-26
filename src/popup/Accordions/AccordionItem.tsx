@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Avatar, Chip, Divider, styled, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Chip, styled, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { type ReactNode, useContext } from 'react';
 import { AppDataContext } from '../context/AppDataProvider';
@@ -11,12 +11,6 @@ const AccordionTitle = styled(AccordionSummary)({
         gap: '10px',
         alignItems: 'center',
     },
-});
-
-const AccordionTitleAvatar = styled(Avatar)({
-    width: 20,
-    height: 20,
-    fontSize: '1rem',
 });
 
 export const AccordionItem = ({
