@@ -1,8 +1,12 @@
 # Ome.tv Automator
 
-![Test Status: Production](https://github.com/mstephen19/ome-automator/actions/workflows/run_tests.yaml/badge.svg?branch=main&label=prod)
+Production:
 
-![Test Status: Development](https://github.com/mstephen19/ome-automator/actions/workflows/run_tests.yaml/badge.svg?branch=develop&label=dev)
+![Test Status: Production](https://github.com/mstephen19/ome-automator/actions/workflows/run_tests.yaml/badge.svg?branch=main)
+
+Development:
+
+![Test Status: Development](https://github.com/mstephen19/ome-automator/actions/workflows/run_tests.yaml/badge.svg?branch=develop)
 
 > Stay tuned for more info. Currently pending Chrome Web Store approval.
 
