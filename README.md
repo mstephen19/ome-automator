@@ -1,5 +1,9 @@
 # Ome.tv Automator
 
+![Test Status: Production](https://github.com/mstephen19/ome-automator/actions/workflows/run_tests.yaml/badge.svg?branch=main&label=prod)
+
+![Test Status: Development](https://github.com/mstephen19/ome-automator/actions/workflows/run_tests.yaml/badge.svg?branch=develop&label=dev)
+
 > Stay tuned for more info. Currently pending Chrome Web Store approval.
 
 Ome.tv Automator automatically sends your messages to thousands of people.
