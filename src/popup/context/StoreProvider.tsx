@@ -6,6 +6,8 @@ import { CircularProgress } from '@mui/material';
  * Creates a generic provider for use with a {@link chromeStorage} adapter.
  *
  * Initializes the store, and updates the context value when changes are detected.
+ *
+ * Will not render children until the store has been initialized. Assumes zero store errors.
  */
 export function storeProvider<Data>({
     context,

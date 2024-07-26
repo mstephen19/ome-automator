@@ -1,5 +1,5 @@
 import { TextField } from '@mui/material';
-import { useState, useContext } from 'react';
+import { useState, useContext, ChangeEventHandler } from 'react';
 import { appDataStore, messageStore } from '../../../storage';
 import { sanitize } from '../../../utils';
 
@@ -11,11 +11,18 @@ export const AddMessageBox = () => {
     const messages = useContext(MessageSequenceContext);
     const appData = useContext(AppDataContext);
 
-    // const [inputText, setInputText] = useState('');
+    // Safe to initialize with async retrieved store value because the provider
+    // doesn't render children until data is initialized.
+    const [inputText, setInputText] = useState(appData.addMessageText);
     const [loading, setLoading] = useState(false);
 
     const [validationError, setValidationError] = useState('');
     const showError = Boolean(validationError);
+
+    const handleMessageChange: ChangeEventHandler<HTMLInputElement> = async (e) => {
+        setInputText(e.target.value);
+        await appDataStore.write({ ...appData, addMessageText: e.target.value });
+    };
 
     const handleAddMessage = async (unsanitized: string) => {
         setLoading(true);
@@ -39,6 +46,7 @@ export const AddMessageBox = () => {
         // Add the message to the end of the list
         // Clear out the addMessageText
         await Promise.all([messageStore.write([...messages, { id, content }]), appDataStore.write({ ...appData, addMessageText: '' })]);
+        setInputText('');
 
         setValidationError('');
         setLoading(false);
@@ -60,9 +68,9 @@ export const AddMessageBox = () => {
                     handleAddMessage(appData.addMessageText);
                 }
             }}
-            value={appData.addMessageText}
+            value={inputText}
             // ? Store the latest text value in the data store - seamless through popup reloads
-            onChange={(e) => appDataStore.write({ ...appData, addMessageText: e.target.value })}
+            onChange={handleMessageChange}
             helperText={showError ? validationError : 'Press "Enter" to add your message to the sequence.'}
             error={showError}
             // sx={{ position: 'sticky', top: 0 }}
