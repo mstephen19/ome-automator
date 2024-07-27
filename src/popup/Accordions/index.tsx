@@ -9,8 +9,6 @@ import { Divider } from '@mui/material';
 import { Help } from './Help';
 import { EXTENSION_MANIFEST } from '../../consts';
 
-const extensionVersion = chrome.runtime.getManifest().version;
-
 export const Accordions = () => {
     const messages = useContext(MessageSequenceContext);
 
