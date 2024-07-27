@@ -1,7 +1,5 @@
 import { AppData, Config, Message, TabData } from './types';
 
-export const EXTENSION_MANIFEST = chrome.runtime.getManifest();
-
 export const defaultAppData: AppData = {
     addMessageText: '',
     messageSequenceOpen: false,
