@@ -27,6 +27,7 @@ vi.stubGlobal('chrome', {
             addListener: chromeTabMessages.addListener,
             removeListener: chromeTabMessages.removeListener,
         },
+        getManifest: () => ({ version: '1.0.1', description: 'Reliably deliver message sequences to Ome.tv connections.' }),
     },
     storage: {
         local: {
