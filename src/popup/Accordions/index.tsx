@@ -7,7 +7,7 @@ import { MessageSequenceContext } from '../context/MessageSequenceProvider';
 import { AccordionItem } from './AccordionItem';
 import { Divider } from '@mui/material';
 import { Help } from './Help';
-import { EXTENSION_MANIFEST } from '../consts';
+import { EXTENSION_MANIFEST } from '../../consts';
 
 export const Accordions = () => {
     const messages = useContext(MessageSequenceContext);

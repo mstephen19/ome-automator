@@ -27,6 +27,7 @@ vi.stubGlobal('chrome', {
             addListener: chromeTabMessages.addListener,
             removeListener: chromeTabMessages.removeListener,
         },
+        getManifest: () => ({}),
     },
     storage: {
         local: {
