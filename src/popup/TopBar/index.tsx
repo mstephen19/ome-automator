@@ -6,7 +6,7 @@ import { ThemeSwitch } from './ThemeSwitch';
 
 import logoGrey from '../../assets/logo-grey.png';
 import logoWhite from '../../assets/logo-white.png';
-import { EXTENSION_MANIFEST } from '../../consts';
+import { EXTENSION_MANIFEST } from '../consts';
 
 const Logo = ({ theme }: { theme: 'dark' | 'light' }) => (
     <Link href='https://ome.tv/' target='_blank' rel='nofollower'>
