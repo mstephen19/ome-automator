@@ -1,16 +1,16 @@
 # Ome.tv Automator
 
-Production:
+Ome.tv Automator automatically sends your messages to thousands of people.
+
+See it on the [Chrome Web Store](https://chromewebstore.google.com/detail/ometv-automator/kdakicmdgfidhnnfjgomlkoikigebpdf).
+
+**Production**:
 
 ![Test Status: Production](https://github.com/mstephen19/ome-automator/actions/workflows/run_tests.yaml/badge.svg?branch=main)
 
-Development:
+**Development**:
 
 ![Test Status: Development](https://github.com/mstephen19/ome-automator/actions/workflows/run_tests.yaml/badge.svg?branch=develop)
-
-> Stay tuned for more info. Currently pending Chrome Web Store approval.
-
-Ome.tv Automator automatically sends your messages to thousands of people.
 
 ## Get started
 
