@@ -7,6 +7,7 @@ import { status, Status, raceWithStatus, waitForStatus } from './status';
 import { tabDataStore } from '../storage';
 import { StatusError, TimeoutError, StoppedError } from './errors';
 import { transforms } from '../transforms';
+import { defaultConfig } from '../consts';
 
 const clickStart = () => {
     const start = elements.startButton()!;
@@ -73,15 +74,39 @@ const checkStopTime = async () => {
     if (stopAfterEnabled && mustStop) throw new StoppedError();
 };
 
-const messagePipeline = raceWithStatus(
-    pipeline<string, void>(transforms.transformAllBlocks, sendMessage, sleep('messageTimeoutSecs', 1_000)),
-    ({ detail: status }) => status !== Status.Connected
-);
+const ifElse =
+    (
+        predicate: () => boolean | Promise<boolean>,
+        ifHandler: (...args: any[]) => void | Promise<any>,
+        elseHandler?: (...args: any[]) => void | Promise<any>
+    ) =>
+    async (...args: any[]) => {
+        if (await predicate()) return ifHandler(...args);
+        return elseHandler?.(...args);
+    };
 
 const sendMessages = async () => {
-    for (const message of messages.latest!) {
-        // todo: Don't wait messageTimeoutSecs after the last message
-        await messagePipeline(message.content);
+    const messageList = messages.latest!;
+    let i = 0;
+
+    const messagePipeline = raceWithStatus(
+        pipeline<string, void>(
+            transforms.transformAllBlocks,
+            sendMessage,
+            ifElse(
+                () => i < messageList.length - 1,
+                sleep('messageTimeoutSecs', 1_000),
+                // Don't wait messageTimeoutSecs after the last message
+                // Wait one second instead
+                () => wait(defaultConfig.messageTimeoutSecs)
+            )
+        ),
+        ({ detail: status }) => status !== Status.Connected
+    );
+
+    while (i < messageList.length) {
+        await messagePipeline(messageList[i].content);
+        i++;
     }
 };
 
@@ -112,17 +137,6 @@ const bypassShowFaceMessage = async () => {
     await waitForButtonToDisappear;
     clearInterval(interval);
 };
-
-const ifElse =
-    (
-        predicate: () => boolean | Promise<boolean>,
-        ifHandler: (...args: any[]) => void | Promise<any>,
-        elseHandler: (...args: any[]) => void | Promise<any>
-    ) =>
-    async (...args: any[]) => {
-        if (await predicate()) return ifHandler(...args);
-        return elseHandler(...args);
-    };
 
 /**
  * Runs the message sequence once.
