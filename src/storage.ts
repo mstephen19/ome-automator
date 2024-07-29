@@ -1,10 +1,11 @@
-import { AppData, Config, TabData, type Message } from './types';
+import { AddOns, AppData, Config, TabData, type Message } from './types';
 
-export const enum SyncStorageKey {
+export const enum StorageKey {
     MessageSequence = 'message_sequence',
     Config = 'config',
     AppData = 'app_data',
     TabData = 'tab_data',
+    AddOns = 'addons',
 }
 
 /**
@@ -59,7 +60,8 @@ export const memCache = <Data>(api: ReturnType<typeof chromeStorage<Data>>) => {
     };
 };
 
-export const messageStore = chromeStorage<Message[]>(chrome.storage.local, SyncStorageKey.MessageSequence);
-export const configStore = chromeStorage<Config>(chrome.storage.local, SyncStorageKey.Config);
-export const appDataStore = chromeStorage<AppData>(chrome.storage.local, SyncStorageKey.AppData);
-export const tabDataStore = chromeStorage<TabData>(chrome.storage.local, SyncStorageKey.TabData);
+export const messageStore = chromeStorage<Message[]>(chrome.storage.local, StorageKey.MessageSequence);
+export const configStore = chromeStorage<Config>(chrome.storage.local, StorageKey.Config);
+export const appDataStore = chromeStorage<AppData>(chrome.storage.local, StorageKey.AppData);
+export const tabDataStore = chromeStorage<TabData>(chrome.storage.local, StorageKey.TabData);
+export const addOnsStore = chromeStorage<AddOns>(chrome.storage.local, StorageKey.AddOns);

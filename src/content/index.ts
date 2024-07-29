@@ -1,18 +1,42 @@
 import { tabDataStore } from '../storage';
-import { messages, tabData, config } from './cache';
+import { messages, tabData, config, addOns } from './cache';
 import { commands } from './commands';
 import { resetToIdle, sequenceLoop } from './sequence';
 import { Command } from '../types';
 import { status } from './status';
-import { defaultConfig, defaultMessageSequence, defaultTabData } from '../consts';
-import { elements } from './elements';
+import { defaultAddOns, defaultConfig, defaultMessageSequence, defaultTabData } from '../consts';
+import { elements, Tip } from './elements';
+import { injectScripts } from './injected';
+import { page } from './page';
+import { PageEvent } from './injected/types';
+import { getIPDetails } from '../utils';
 
 async function main() {
+    page.events.addEventListener(PageEvent.PeerChange, async (e) => {
+        if (!addOns.latest?.showLocationInfo) return;
+
+        Tip.setIpAddress(e.detail.address);
+
+        const details = await getIPDetails(e.detail.address);
+
+        Tip.setUsingVpn(details.isProxy ? 'Yes' : 'No');
+        Tip.setCity(details.cityName);
+        Tip.setZipCode(details.zipCode);
+        Tip.setRegion(details.regionName);
+        Tip.setCountryCode(details.countryCode);
+        Tip.setCountryName(details.countryName);
+        Tip.setNativeLanguage(details.language);
+        Tip.setContinent(details.continent);
+    });
+
+    await injectScripts();
+
     // Initialize data
-    // After this call, these caches cannot be null - they are populated with default data.
+    // After this call, these caches are never null - they are populated with default data.
     await messages.init(defaultMessageSequence);
     await config.init(defaultConfig);
     await tabData.init(defaultTabData);
+    await addOns.init(defaultAddOns);
 
     const startListener = async ({ detail: tabId }: CustomEvent<number>) => {
         // If the login popup is open or there's an error, do nothing, but still listen for "Start" button clicks.
