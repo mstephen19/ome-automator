@@ -87,26 +87,29 @@ export const waitForStatus =
     (predicate: (status: Status) => boolean, timeoutMs = 15_000) =>
     () => {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
         if (predicate(status.latest)) return;
 
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
         return new Promise((resolve, reject) => {
-            const abortListener = () => {
+            function abortListener() {
                 reject(new TimeoutError());
 
+                status.events.removeEventListener('change', changeListener);
                 controller.signal.removeEventListener('abort', abortListener);
-            };
+            }
 
             controller.signal.addEventListener('abort', abortListener);
 
-            const changeListener = ({ detail: latest }: CustomEvent<Status>) => {
+            function changeListener({ detail: latest }: CustomEvent<Status>) {
                 if (!predicate(latest)) return;
 
                 clearTimeout(timeout);
                 status.events.removeEventListener('change', changeListener);
+                controller.signal.removeEventListener('abort', abortListener);
                 resolve(undefined);
-            };
+            }
 
             status.events.addEventListener('change', changeListener);
         });

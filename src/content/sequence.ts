@@ -36,7 +36,7 @@ const startSearch = async () => {
     clearInterval(interval);
 };
 
-const sleep = (key: keyof Config, multiplier: number) => async () => {
+const sleep = (key: Exclude<keyof Config, 'autoSkipEnabled'>, multiplier: number) => async () => {
     await wait(config.latest![key] * multiplier);
 };
 
@@ -113,6 +113,17 @@ const bypassShowFaceMessage = async () => {
     clearInterval(interval);
 };
 
+const ifElse =
+    (
+        predicate: () => boolean | Promise<boolean>,
+        ifHandler: (...args: any[]) => void | Promise<void>,
+        elseHandler: (...args: any[]) => void | Promise<void>
+    ) =>
+    async (...args: any[]) => {
+        if (await predicate()) return ifHandler(...args);
+        return elseHandler(...args);
+    };
+
 /**
  * Runs the message sequence once.
  *
@@ -140,6 +151,8 @@ const sequence = raceWithStopped(
         // Ensure connected to one stranger the whole time.
         // Wait post-sequence timeout.
         raceWithStatus(sleep('endSequenceTimeoutSecs', 1_000), ({ detail: status }) => status !== Status.Connected),
+
+        ifElse(() => Boolean(config.latest?.autoSkipEnabled), clickStart),
         // Click "Next" (AKA "Start").
         clickStart
     )
