@@ -19,7 +19,8 @@
     "content_scripts": [
         {
             "matches": ["https://ome.tv/*"],
-            "js": ["src/content/index.ts"]
+            "js": ["src/content/index.ts"],
+            "run_at": "document_start"
         }
     ]
 }

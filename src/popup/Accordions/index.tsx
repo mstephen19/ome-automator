@@ -8,6 +8,8 @@ import { AccordionItem } from './AccordionItem';
 import { Divider } from '@mui/material';
 import { Help } from './Help';
 import { EXTENSION_MANIFEST } from '../../consts';
+import { AddOnsProvider } from '../context/AddOnsProvider';
+import { AddOns } from './AddOns';
 
 export const Accordions = () => {
     const messages = useContext(MessageSequenceContext);
@@ -24,6 +26,14 @@ export const Accordions = () => {
                 <ConfigProvider>
                     <Settings />
                 </ConfigProvider>
+            </AccordionItem>
+
+            <Divider />
+
+            <AccordionItem dataKey='addOnsOpen' title='Add-Ons' maxHeight='375px'>
+                <AddOnsProvider>
+                    <AddOns />
+                </AddOnsProvider>
             </AccordionItem>
 
             <Divider />

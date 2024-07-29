@@ -1,22 +1,10 @@
-import { Box, Slider, TextField, Tooltip, Typography } from '@mui/material';
+import { Slider, TextField } from '@mui/material';
 import { ComponentProps, useContext } from 'react';
 import { ConfigContext } from '../../context/ConfigProvider';
-import InfoIcon from '@mui/icons-material/Info';
 
 import { Config } from '../../../types';
 import { configStore } from '../../../storage';
-
-const ConfigName = ({ name, tip, value, unit }: { name: string; tip: string; value?: number; unit: string }) => (
-    <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        <Tooltip title={tip} arrow placement='top'>
-            <InfoIcon sx={{ fontSize: '1rem', cursor: 'pointer' }} />
-        </Tooltip>
-
-        <Typography>
-            {name}: {value} {unit}
-        </Typography>
-    </Box>
-);
+import { ConfigName } from '../ConfigName';
 
 export const ConfigNumberInput = ({
     variant,
