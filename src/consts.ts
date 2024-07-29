@@ -16,6 +16,7 @@ export const defaultConfig: Config = {
     startSequenceTimeoutSecs: 0,
     stopAfterTimeoutMins: 0,
     endSequenceTimeoutSecs: 0,
+    autoSkipEnabled: true,
 };
 
 export const defaultMessageSequence: Message[] = [];

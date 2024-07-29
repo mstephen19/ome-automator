@@ -20,6 +20,10 @@ export type Config = {
      * Number of minutes to run for before stopping.
      */
     stopAfterTimeoutMins: number;
+    /**
+     * Whether or not to auto-skip connections, or wait for the status.
+     */
+    autoSkipEnabled: boolean;
 };
 
 export type AppData = {

@@ -1,9 +1,16 @@
 import { Box } from '@mui/material';
 import { ConfigNumberInput } from './ConfigNumberInput';
+import { ConfigSwitchInput } from './ConfigSwitchInput';
 
 export const Settings = () => {
     return (
         <Box component='form' name='settings'>
+            <ConfigSwitchInput
+                configKey='autoSkipEnabled'
+                name='Auto-skip'
+                tip='Automatically skip connections after all sequence messages have been sent.'
+            />
+
             <ConfigNumberInput
                 unit='sec(s)'
                 variant='slider'

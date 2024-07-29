@@ -13,7 +13,7 @@ export const ConfigNumberInput = ({
     max,
     ...props
 }: ComponentProps<typeof ConfigName> & {
-    configKey: keyof Config;
+    configKey: Exclude<keyof Config, 'autoSkipEnabled'>;
     min: number;
     max: number;
     variant: 'slider' | 'number';
