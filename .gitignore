@@ -25,3 +25,6 @@ dist-ssr
 
 # Logo Pixelmator project
 logo.pxd
+
+# Compressed dist folder
+dist.zip
