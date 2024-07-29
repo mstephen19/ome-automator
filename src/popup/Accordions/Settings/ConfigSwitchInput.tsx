@@ -4,7 +4,7 @@ import { ConfigContext } from '../../context/ConfigProvider';
 import { configStore } from '../../../storage';
 import { ConfigName } from '../ConfigName';
 import { ConfigSwitch } from '../ConfigSwitch';
-import { Box } from '@mui/material';
+import { Box, FormControlLabel } from '@mui/material';
 
 export const ConfigSwitchInput = ({
     configKey,
@@ -20,9 +20,12 @@ export const ConfigSwitchInput = ({
 
     return (
         <Box display='flex' gap='10px'>
-            <ConfigName {...props} value={config[configKey] ? 'On' : 'Off'} />
+            <ConfigName {...props} />
 
-            <ConfigSwitch onChange={handleChange} checked={config[configKey]} />
+            <FormControlLabel
+                control={<ConfigSwitch onChange={handleChange} checked={config[configKey]} />}
+                label={config[configKey] ? 'On' : 'Off'}
+            />
         </Box>
     );
 };

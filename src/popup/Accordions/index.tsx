@@ -16,7 +16,12 @@ export const Accordions = () => {
 
     return (
         <>
-            <AccordionItem dataKey='messageSequenceOpen' title='Message Sequence' chip={messages.length.toString()} maxHeight='375px'>
+            <AccordionItem
+                dataKey='messageSequenceOpen'
+                title='Message Sequence'
+                chip={messages.length.toString()}
+                chipColor={messages.length > 0 ? 'primary' : 'default'}
+                maxHeight='375px'>
                 <MessageSequencer />
             </AccordionItem>
 
@@ -30,7 +35,7 @@ export const Accordions = () => {
 
             <Divider />
 
-            <AccordionItem dataKey='addOnsOpen' title='Add-Ons' maxHeight='375px'>
+            <AccordionItem dataKey='addOnsOpen' title='Add-Ons' chip={'New!'} chipColor='primary' maxHeight='375px'>
                 <AddOnsProvider>
                     <AddOns />
                 </AddOnsProvider>
@@ -38,7 +43,7 @@ export const Accordions = () => {
 
             <Divider />
 
-            <AccordionItem dataKey='helpOpen' title='Help, Info & Terms' maxHeight='375px' chip={`v${EXTENSION_MANIFEST.version}`}>
+            <AccordionItem dataKey='helpOpen' title='Help, Info & Terms' chip={`v${EXTENSION_MANIFEST.version}`} maxHeight='375px'>
                 <Help />
             </AccordionItem>
         </>
