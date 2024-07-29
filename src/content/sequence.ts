@@ -97,8 +97,7 @@ const sendMessages = async () => {
                 () => i < messageList.length - 1,
                 sleep('messageTimeoutSecs', 1_000),
                 // Don't wait messageTimeoutSecs after the last message
-                // Wait one second instead
-                () => wait(defaultConfig.messageTimeoutSecs)
+                () => wait(defaultConfig.messageTimeoutSecs * 1_000)
             )
         ),
         ({ detail: status }) => status !== Status.Connected
