@@ -135,3 +135,5 @@ export const getIPDetails = async (address: string) => {
 
     return res.json() as Promise<Partial<IPDetails>>;
 };
+
+export const sanitizeIp = (ip: string) => (ip.startsWith('[') && ip.endsWith(']') ? ip.slice(1, ip.length - 1) : ip);

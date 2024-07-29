@@ -9,15 +9,16 @@ import { elements, Tip } from './elements';
 import { injectScripts } from './injected';
 import { page } from './page';
 import { PageEvent } from './injected/types';
-import { getIPDetails } from '../utils';
+import { getIPDetails, sanitizeIp } from '../utils';
 
 async function main() {
     page.events.addEventListener(PageEvent.PeerChange, async (e) => {
         if (!addOns.latest?.showLocationInfo) return;
+        const sanitizedAddress = sanitizeIp(e.detail.address);
 
-        Tip.setIpAddress(e.detail.address);
+        Tip.setIpAddress(sanitizedAddress);
 
-        const details = await getIPDetails(e.detail.address);
+        const details = await getIPDetails(sanitizedAddress);
 
         Tip.setUsingVpn(details.isProxy ? 'Yes' : 'No');
         Tip.setCity(details.cityName);
