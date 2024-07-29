@@ -9,9 +9,7 @@ import { addOnsStore } from '../../storage';
 export const AddOns = () => {
     const addOns = useContext(AddOnsContext);
 
-    const changeHandler = (key: keyof AddOnsType) => (_: any, checked: boolean) => {
-        addOnsStore.write({ ...addOns, [key]: checked });
-    };
+    const changeHandler = (key: keyof AddOnsType) => (_: any, checked: boolean) => addOnsStore.write({ ...addOns, [key]: checked });
 
     return (
         <Box component='form' name='settings'>
