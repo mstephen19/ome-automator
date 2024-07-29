@@ -116,8 +116,8 @@ const bypassShowFaceMessage = async () => {
 const ifElse =
     (
         predicate: () => boolean | Promise<boolean>,
-        ifHandler: (...args: any[]) => void | Promise<void>,
-        elseHandler: (...args: any[]) => void | Promise<void>
+        ifHandler: (...args: any[]) => void | Promise<any>,
+        elseHandler: (...args: any[]) => void | Promise<any>
     ) =>
     async (...args: any[]) => {
         if (await predicate()) return ifHandler(...args);
@@ -139,7 +139,7 @@ const sequence = raceWithStopped(
         // Click "Start" (if necessary). Spam it until "Searching".
         startSearch,
         // Wait for "Searching" to end.
-        waitForStatus((status) => status !== Status.Searching),
+        waitForStatus((status) => status !== Status.Searching, 15_000),
         // Ensure connected to one stranger the whole time.
         // Wait pre-sequence timeout.
         raceWithStatus(sleep('startSequenceTimeoutSecs', 1_000), ({ detail: status }) => status !== Status.Connected),
@@ -151,10 +151,15 @@ const sequence = raceWithStopped(
         // Ensure connected to one stranger the whole time.
         // Wait post-sequence timeout.
         raceWithStatus(sleep('endSequenceTimeoutSecs', 1_000), ({ detail: status }) => status !== Status.Connected),
-
-        ifElse(() => Boolean(config.latest?.autoSkipEnabled), clickStart),
         // Click "Next" (AKA "Start").
-        clickStart
+        ifElse(
+            // If auto-skip is on
+            () => Boolean(config.latest?.autoSkipEnabled),
+            // Skip
+            clickStart,
+            // Wait for manual skip
+            waitForStatus((status) => status !== Status.Connected)
+        )
     )
 );
 

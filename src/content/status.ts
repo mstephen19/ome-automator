@@ -84,15 +84,17 @@ export const raceWithStatus = raceWithEvent(StatusError)(
 );
 
 export const waitForStatus =
-    (predicate: (status: Status) => boolean, timeoutMs = 15_000) =>
+    (predicate: (status: Status) => boolean, timeoutMs = 0) =>
     () => {
         const controller = new AbortController();
 
         if (predicate(status.latest)) return;
 
-        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+        let timeout: ReturnType<typeof setTimeout>;
+        if (timeoutMs > 0) setTimeout(() => controller.abort(), timeoutMs);
 
         return new Promise((resolve, reject) => {
+            // Once timeout is reached
             function abortListener() {
                 reject(new TimeoutError());
 
