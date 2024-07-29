@@ -1,9 +1,10 @@
 {
     "name": "ometv",
     "private": true,
-    "version": "1.0.1",
+    "version": "1.1.0",
     "scripts": {
         "dev": "vite",
+        "lint": "tsc --noEmit",
         "test": "vitest",
         "build": "tsc && vite build",
         "preview": "vite preview"

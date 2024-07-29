@@ -1,3 +1,5 @@
+import type { IPDetails } from './types';
+
 export const sanitize = (str: string) => str.trim();
 
 export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)) as Promise<void>;
@@ -127,3 +129,11 @@ export const pollPredicate = async (ms: number, predicate: () => boolean): Promi
     await wait(ms);
     return pollPredicate(ms, predicate);
 };
+
+export const getIPDetails = async (address: string) => {
+    const res = await fetch(`https://freeipapi.com/api/json/${address}`);
+
+    return res.json() as Promise<Partial<IPDetails>>;
+};
+
+export const sanitizeIp = (ip: string) => (ip.startsWith('[') && ip.endsWith(']') ? ip.slice(1, ip.length - 1) : ip);

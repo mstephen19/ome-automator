@@ -20,14 +20,23 @@ export type Config = {
      * Number of minutes to run for before stopping.
      */
     stopAfterTimeoutMins: number;
+    /**
+     * Whether or not to auto-skip connections, or wait for the status.
+     */
+    autoSkipEnabled: boolean;
 };
 
 export type AppData = {
     addMessageText: string;
     messageSequenceOpen: boolean;
     settingsOpen: boolean;
+    addOnsOpen: boolean;
     helpOpen: boolean;
     theme: 'light' | 'dark';
+};
+
+export type AddOns = {
+    showLocationInfo: boolean;
 };
 
 export type TabData = {
@@ -53,4 +62,16 @@ export type CommandMessage = {
     extensionId: string;
     command: Command;
     tabId: number;
+};
+
+export type IPDetails = {
+    isProxy: boolean;
+    ipVersion: number;
+    cityName: string;
+    zipCode: string;
+    regionName: string;
+    countryCode: string;
+    countryName: string;
+    language: string;
+    continent: string;
 };

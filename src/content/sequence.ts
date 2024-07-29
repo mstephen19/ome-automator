@@ -7,6 +7,7 @@ import { status, Status, raceWithStatus, waitForStatus } from './status';
 import { tabDataStore } from '../storage';
 import { StatusError, TimeoutError, StoppedError } from './errors';
 import { transforms } from '../transforms';
+import { defaultConfig } from '../consts';
 
 const clickStart = () => {
     const start = elements.startButton()!;
@@ -36,7 +37,7 @@ const startSearch = async () => {
     clearInterval(interval);
 };
 
-const sleep = (key: keyof Config, multiplier: number) => async () => {
+const sleep = (key: Exclude<keyof Config, 'autoSkipEnabled'>, multiplier: number) => async () => {
     await wait(config.latest![key] * multiplier);
 };
 
@@ -73,15 +74,38 @@ const checkStopTime = async () => {
     if (stopAfterEnabled && mustStop) throw new StoppedError();
 };
 
-const messagePipeline = raceWithStatus(
-    pipeline<string, void>(transforms.transformAllBlocks, sendMessage, sleep('messageTimeoutSecs', 1_000)),
-    ({ detail: status }) => status !== Status.Connected
-);
+const ifElse =
+    (
+        predicate: () => boolean | Promise<boolean>,
+        ifHandler: (...args: any[]) => void | Promise<any>,
+        elseHandler?: (...args: any[]) => void | Promise<any>
+    ) =>
+    async (...args: any[]) => {
+        if (await predicate()) return ifHandler(...args);
+        return elseHandler?.(...args);
+    };
 
 const sendMessages = async () => {
-    for (const message of messages.latest!) {
-        // todo: Don't wait messageTimeoutSecs after the last message
-        await messagePipeline(message.content);
+    const messageList = messages.latest!;
+    let i = 0;
+
+    const messagePipeline = raceWithStatus(
+        pipeline<string, void>(
+            transforms.transformAllBlocks,
+            sendMessage,
+            ifElse(
+                () => i < messageList.length - 1,
+                sleep('messageTimeoutSecs', 1_000),
+                // Don't wait messageTimeoutSecs after the last message
+                () => wait(defaultConfig.messageTimeoutSecs * 1_000)
+            )
+        ),
+        ({ detail: status }) => status !== Status.Connected
+    );
+
+    while (i < messageList.length) {
+        await messagePipeline(messageList[i].content);
+        i++;
     }
 };
 
@@ -128,7 +152,7 @@ const sequence = raceWithStopped(
         // Click "Start" (if necessary). Spam it until "Searching".
         startSearch,
         // Wait for "Searching" to end.
-        waitForStatus((status) => status !== Status.Searching),
+        waitForStatus((status) => status !== Status.Searching, 15_000),
         // Ensure connected to one stranger the whole time.
         // Wait pre-sequence timeout.
         raceWithStatus(sleep('startSequenceTimeoutSecs', 1_000), ({ detail: status }) => status !== Status.Connected),
@@ -141,7 +165,14 @@ const sequence = raceWithStopped(
         // Wait post-sequence timeout.
         raceWithStatus(sleep('endSequenceTimeoutSecs', 1_000), ({ detail: status }) => status !== Status.Connected),
         // Click "Next" (AKA "Start").
-        clickStart
+        ifElse(
+            // If auto-skip is on
+            () => Boolean(config.latest?.autoSkipEnabled),
+            // Skip
+            clickStart,
+            // Wait for manual skip
+            waitForStatus((status) => status !== Status.Connected)
+        )
     )
 );
 
