@@ -21,7 +21,7 @@ export const AddOns = () => {
                     tip='Display location info about connections. Uses extra bandwidth. May not display for all peers.'
                     value={addOns.showLocationInfo ? 'On' : 'Off'}
                 />
-                <ConfigSwitch onChange={changeHandler('showLocationInfo')} />
+                <ConfigSwitch onChange={changeHandler('showLocationInfo')} checked={addOns.showLocationInfo} />
             </Box>
         </Box>
     );
