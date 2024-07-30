@@ -1,6 +1,7 @@
-import { IconButton, List, ListItem, ListItemProps, ListItemText, TextField, Tooltip, styled } from '@mui/material';
-import React, { useEffect, useState, useContext, createContext } from 'react';
+import { IconButton, ListItem, ListItemProps, ListItemText, Tooltip, styled } from '@mui/material';
+import { useState, useContext } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditOffIcon from '@mui/icons-material/EditOff';
 import { messageStore } from '../../../storage';
 import { sanitize } from '../../../utils';
 import { MessageSequenceContext } from '../../context/MessageSequenceProvider';
@@ -24,7 +25,7 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
     /**
      * Optionally pass a replacement {@link Message} to delete & replace.
      */
-    const handleDelete = async (updated?: Partial<Message>) => {
+    const handleUpdate = async (updated?: Partial<Message>) => {
         const index = messages.findIndex(({ id }) => id === message.id);
         if (index === -1) return;
 
@@ -32,47 +33,67 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
 
         const clone = [...messages];
 
+        // Replace the current message item with the updated one
         if (updated) clone.splice(index, 1, { ...clone[index], ...updated });
+        // Or remove the item entirely
         else clone.splice(index, 1);
 
+        // Rewrite the entire message list
         await messageStore.write(clone);
 
         setLoading(false);
     };
 
     return (
-        <MessageListItem {...props}>
+        <MessageListItem {...props} selected={editing}>
             <ListItemText
                 primary={message.content}
                 onKeyDown={(e) => {
                     const editedText = (e.target as HTMLSpanElement).textContent || '';
+                    if (!editing || !editedText.trim()) return;
 
-                    if (editing && e.key === 'Enter' && !e.shiftKey && editedText.trim()) {
+                    // Enter + Shift for new lines
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
                         setEditing(false);
 
-                        handleDelete({ content: sanitize(editedText) });
+                        handleUpdate({ content: sanitize(editedText) });
                     }
                 }}
                 contentEditable={editing}
                 // Unable to double-click to edit during loading
-                onDoubleClick={() => !loading && setEditing(true)}
+                onDoubleClick={() => {
+                    if (!loading) {
+                        setEditing(true);
+                    }
+                }}
+                ref={(elem) => {
+                    if (editing) (elem as HTMLDivElement)?.focus();
+                }}
                 sx={{
                     flex: 1,
                     wordWrap: 'break-word',
                     userSelect: 'none',
+                    whiteSpace: 'pre-wrap',
                 }}
             />
 
-            <Tooltip title='Remove' arrow>
+            <Tooltip title={editing ? 'Cancel' : 'Delete'} arrow>
                 <span>
-                    <IconButton
-                        // ? Disallow deleting the last message in the sequence realtime if
-                        // ? it's the last one.
-                        disabled={loading || (running && messages.length === 1)}
-                        sx={{ alignSelf: 'start' }}
-                        onClick={() => handleDelete()}>
-                        <DeleteIcon />
-                    </IconButton>
+                    {editing ? (
+                        <IconButton sx={{ alignSelf: 'start' }} onClick={() => setEditing(false)}>
+                            <EditOffIcon />
+                        </IconButton>
+                    ) : (
+                        <IconButton
+                            // ? Disallow deleting the last message in the sequence realtime if
+                            // ? it's the last one.
+                            disabled={loading || (running && messages.length === 1)}
+                            sx={{ alignSelf: 'start' }}
+                            onClick={() => handleUpdate()}>
+                            <DeleteIcon />
+                        </IconButton>
+                    )}
                 </span>
             </Tooltip>
         </MessageListItem>
