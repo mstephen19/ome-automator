@@ -109,6 +109,7 @@ export const raceWithEvent =
                     }
                 };
 
+                // todo: Use AbortController for more control over removing listeners
                 target.addEventListener(eventName, listener);
 
                 try {
