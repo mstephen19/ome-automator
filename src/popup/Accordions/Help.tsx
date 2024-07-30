@@ -12,7 +12,7 @@ import {
     ListItemText,
     Typography,
 } from '@mui/material';
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 
 const InfoCard = ({
     title,
@@ -40,12 +40,13 @@ const InfoCard = ({
     );
 };
 
-export const Help = () => {
+export const Help = memo(() => {
     return (
         <Box sx={{ gap: '10px', display: 'flex', flexDirection: 'column' }}>
             <InfoCard
                 title='What is the message sequence?'
                 subheader='A list of messages created by you. Sent one-by-one to each connection.'
+                content={<Typography>Tip: Double-click a message in the sequence to edit it.</Typography>}
             />
 
             <InfoCard title='How many tabs can run simultaneously?' subheader='One.' />
@@ -140,4 +141,4 @@ export const Help = () => {
             />
         </Box>
     );
-};
+});
