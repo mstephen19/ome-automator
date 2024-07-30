@@ -3,7 +3,7 @@ import { useState, useContext } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditOffIcon from '@mui/icons-material/EditOff';
 import { messageStore } from '../../../storage';
-import { sanitize } from '../../../utils';
+import { moveCursorToEnd, sanitize } from '../../../utils';
 import { MessageSequenceContext } from '../../context/MessageSequenceProvider';
 
 import type { Message } from '../../../types';
@@ -67,8 +67,11 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
                         setEditing(true);
                     }
                 }}
-                ref={(elem) => {
-                    if (editing) (elem as HTMLDivElement)?.focus();
+                ref={(elem: HTMLDivElement) => {
+                    if (editing && elem && document.activeElement !== elem) {
+                        elem.focus();
+                        moveCursorToEnd(elem);
+                    }
                 }}
                 sx={{
                     flex: 1,
