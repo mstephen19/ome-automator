@@ -4,12 +4,13 @@ import { commands } from './commands';
 import { resetToIdle, sequenceLoop } from './sequence';
 import { Command } from '../types';
 import { status } from './status';
-import { defaultAddOns, defaultConfig, defaultMessageSequence, defaultTabData } from '../consts';
+import { CSSOverrideClass, defaultAddOns, defaultConfig, defaultMessageSequence, defaultTabData } from '../consts';
 import { elements, Tip } from './elements';
 import { injectScripts } from './injected';
 import { page } from './page';
 import { PageCommand, PageEvent } from './injected/types';
 import { getIPDetails, sanitizeIp } from '../utils';
+import './cssOverrides.css';
 
 async function main() {
     page.events.addEventListener(PageEvent.PeerChange, async (e) => {
@@ -41,8 +42,8 @@ async function main() {
 
     page.command(PageCommand.SetAddOnConfig, addOns.latest!);
     addOnsStore.onChange((latest) => {
-        console.log('Change');
         page.command(PageCommand.SetAddOnConfig, latest);
+        document.body.classList[latest.darkMode ? 'add' : 'remove'](CSSOverrideClass.DarkTheme);
     });
 
     const startListener = async ({ detail: tabId }: CustomEvent<number>) => {

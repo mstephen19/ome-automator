@@ -42,6 +42,15 @@ export const AddOns = () => {
                     label={addOns.muteAudio ? 'Muted' : 'Off'}
                 />
             </Box>
+
+            <Box display='flex' gap='10px'>
+                <ConfigName name='Dark mode' tip='Apply a minimal pallette change that is friendly on the eyes.' />
+
+                <FormControlLabel
+                    control={<ConfigSwitch onChange={changeHandler('darkMode')} checked={addOns.darkMode} />}
+                    label={addOns.darkMode ? 'On' : 'Off'}
+                />
+            </Box>
         </Box>
     );
 };

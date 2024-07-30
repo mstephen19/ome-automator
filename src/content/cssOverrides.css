@@ -1,0 +1,56 @@
+/* https://mui.com/material-ui/customization/color/ */
+:root {
+    --text: white;
+    --dark1: rgb(18, 18, 18);
+    --dark2: #424242;
+    --dark3: #616161;
+}
+
+/* General dark background */
+body.dark-theme #roulette.vertical,
+body.dark-theme .chat__body,
+body.dark-theme .roulette-box,
+body.dark-theme .chat__messages,
+body.dark-theme .buttons__wrapper {
+    background: var(--dark1) !important;
+}
+
+/* Popups */
+body.dark-theme .gender-selector__popup,
+body.dark-theme .country-filter-popup {
+    background: var(--dark2) !important;
+}
+
+body.dark-theme .gender-selector__popup-item,
+body.dark-theme .country-filter-popup__country {
+    color: var(--text) !important;
+}
+
+/* Large Buttons */
+body.dark-theme .btn-gray > .btn__bg {
+    border-color: var(--dark3) !important;
+}
+body.dark-theme .btn-gray > .btn__bg > span {
+    color: var(--text) !important;
+    text-shadow: none !important;
+}
+body.dark-theme .btn-gray > .btn__bg::before {
+    background: var(--dark2) !important;
+    border-color: var(--dark3) !important;
+}
+body.dark-theme .btn-gray::after {
+    background: var(--dark3) !important;
+}
+
+/* Chat */
+body.dark-theme .chat__textarea {
+    background: var(--dark2) !important;
+    color: var(--text) !important;
+}
+body.dark-theme .message-bubble {
+    background: var(--dark2) !important;
+    color: var(--text);
+}
+body.dark-theme .message-bubble::after {
+    border-top-color: var(--dark2) !important;
+}
