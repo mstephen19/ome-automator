@@ -6,6 +6,7 @@ import { sanitize } from '../../../utils';
 import { MessageSequenceContext } from '../../context/MessageSequenceProvider';
 import { transforms } from '../../../transforms';
 import { AppDataContext } from '../../context/AppDataProvider';
+import { MAX_MESSAGE_SEQUENCE_LENGTH } from '../../../consts';
 
 export const AddMessageBox = () => {
     const messages = useContext(MessageSequenceContext);
@@ -52,10 +53,12 @@ export const AddMessageBox = () => {
         setLoading(false);
     };
 
+    const reachedMax = messages.length >= MAX_MESSAGE_SEQUENCE_LENGTH;
+
     return (
         <TextField
             // ! This causes the text field to lose focus
-            // disabled={loading}
+            disabled={reachedMax}
             fullWidth
             multiline
             label='Message Content'
@@ -73,9 +76,14 @@ export const AddMessageBox = () => {
             value={inputText}
             // ? Store the latest text value in the data store - seamless through popup reloads
             onChange={handleMessageChange}
-            helperText={showError ? validationError : 'Press "Enter" to add your message to the sequence.'}
+            helperText={
+                showError
+                    ? validationError
+                    : reachedMax
+                    ? 'Max number of messages added!'
+                    : 'Press "Enter" to add your message to the sequence.'
+            }
             error={showError}
-            // sx={{ position: 'sticky', top: 0 }}
         />
     );
 };
