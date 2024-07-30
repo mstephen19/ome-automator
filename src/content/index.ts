@@ -1,3 +1,4 @@
+import './overrides.css';
 import { addOnsStore, tabDataStore } from '../storage';
 import { messages, tabData, config, addOns } from './cache';
 import { commands } from './commands';
@@ -10,7 +11,6 @@ import { injectScripts } from './injected';
 import { page } from './page';
 import { PageCommand, PageEvent } from './injected/types';
 import { getIPDetails, sanitizeIp } from '../utils';
-import './cssOverrides.css';
 
 async function main() {
     page.events.addEventListener(PageEvent.PeerChange, async (e) => {
@@ -41,6 +41,7 @@ async function main() {
     await addOns.init(defaultAddOns);
 
     page.command(PageCommand.SetAddOnConfig, addOns.latest!);
+    document.body.classList[addOns.latest!.darkMode ? 'add' : 'remove'](CSSOverrideClass.DarkTheme);
     addOnsStore.onChange((latest) => {
         page.command(PageCommand.SetAddOnConfig, latest);
         document.body.classList[latest.darkMode ? 'add' : 'remove'](CSSOverrideClass.DarkTheme);
