@@ -47,7 +47,7 @@ export const MessageList = () => {
 
                         handleRearrange(+e.dataTransfer.getData('text/plain'), +e.currentTarget.dataset.index!);
                     }}
-                    draggable={!loading}
+                    draggable={!loading && messages.length > 1}
                     key={`message-${message.id}`}
                     message={message}
                     // Display divider only for the final item
@@ -57,7 +57,7 @@ export const MessageList = () => {
 
             {!messages.length && (
                 <ListItem>
-                    <ListItemText sx={{ textAlign: 'center' }}>Your message sequence is empty.</ListItemText>
+                    <ListItemText sx={{ textAlign: 'center' }} primary='Your message sequence is empty.' />
                 </ListItem>
             )}
         </List>

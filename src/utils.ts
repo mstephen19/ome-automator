@@ -109,6 +109,7 @@ export const raceWithEvent =
                     }
                 };
 
+                // todo: Use AbortController for more control over removing listeners
                 target.addEventListener(eventName, listener);
 
                 try {
@@ -137,3 +138,13 @@ export const getIPDetails = async (address: string) => {
 };
 
 export const sanitizeIp = (ip: string) => (ip.startsWith('[') && ip.endsWith(']') ? ip.slice(1, ip.length - 1) : ip);
+
+export const moveCursorToEnd = (elem: Element) => {
+    const range = document.createRange();
+    range.selectNodeContents(elem);
+    range.collapse(false);
+
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+};

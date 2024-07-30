@@ -6,6 +6,7 @@ import { sanitize } from '../../../utils';
 import { MessageSequenceContext } from '../../context/MessageSequenceProvider';
 import { transforms } from '../../../transforms';
 import { AppDataContext } from '../../context/AppDataProvider';
+import { MAX_MESSAGE_SEQUENCE_LENGTH } from '../../../consts';
 
 export const AddMessageBox = () => {
     const messages = useContext(MessageSequenceContext);
@@ -31,14 +32,12 @@ export const AddMessageBox = () => {
         const content = sanitize(unsanitized);
 
         // If tags are detected in the string (e.g. {spin}{/spin}), runs validation.
-        const { ok, byToken } = transforms.validateAllBlocks(content);
-        if (!ok) {
-            const tokensWithErrors = Object.entries(byToken).reduce<string[]>((acc, [token, tokenOk]) => {
-                if (!tokenOk) acc.push(token);
-                return acc;
-            }, []);
+        const ok = transforms.run(content).ok;
 
-            setValidationError(`Syntax error with the following token(s): ${tokensWithErrors.join(', ')}`);
+        console.log(ok);
+
+        if (!ok) {
+            setValidationError(`Syntax error!`);
             setLoading(false);
             return;
         }
@@ -52,28 +51,37 @@ export const AddMessageBox = () => {
         setLoading(false);
     };
 
+    const reachedMax = messages.length >= MAX_MESSAGE_SEQUENCE_LENGTH;
+
     return (
         <TextField
             // ! This causes the text field to lose focus
-            // disabled={loading}
+            disabled={reachedMax}
             fullWidth
             multiline
             label='Message Content'
             placeholder='Hello, how are you?'
             onKeyDown={(e) => {
+                if (!appData.addMessageText.trim()) return;
+
                 // Allow pressing Enter + Shift to create new lines.
-                if (!loading && e.key === 'Enter' && !e.shiftKey && appData.addMessageText.trim()) {
+                if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
 
-                    handleAddMessage(appData.addMessageText);
+                    if (!loading) handleAddMessage(appData.addMessageText);
                 }
             }}
             value={inputText}
             // ? Store the latest text value in the data store - seamless through popup reloads
             onChange={handleMessageChange}
-            helperText={showError ? validationError : 'Press "Enter" to add your message to the sequence.'}
+            helperText={
+                showError
+                    ? validationError
+                    : reachedMax
+                    ? 'Max number of messages added!'
+                    : 'Press "Enter" to add your message to the sequence.'
+            }
             error={showError}
-            // sx={{ position: 'sticky', top: 0 }}
         />
     );
 };

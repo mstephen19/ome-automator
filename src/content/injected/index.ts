@@ -1,4 +1,5 @@
 import webrtc from './webrtc?script&module';
+import media from './media?script&module';
 
 const injectElement = <Tag extends keyof HTMLElementTagNameMap>(
     parent: Element,
@@ -28,4 +29,5 @@ const injectScript = (src: string) =>
         });
     });
 
-export const injectScripts = async () => void (await Promise.all([webrtc].map((script) => injectScript(chrome.runtime.getURL(script)))));
+export const injectScripts = async () =>
+    void (await Promise.all([webrtc, media].map((script) => injectScript(chrome.runtime.getURL(script)))));

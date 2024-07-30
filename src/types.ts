@@ -33,10 +33,23 @@ export type AppData = {
     addOnsOpen: boolean;
     helpOpen: boolean;
     theme: 'light' | 'dark';
+    /**
+     * The last time at which the alert popup was dismissed (e.g. "Rate Ome.tv Automator?").
+     */
+    backdropMessageDismissedUnixMs: number;
+    /**
+     * To be se with a string value relating to the current backdrop messages.
+     *
+     * Once confirmed, the backdrop message will not be displayed again.
+     * If the backdrop message changes, the confirmation ID set here should change.
+     */
+    backdropConfirmation: string | null;
 };
 
 export type AddOns = {
     showLocationInfo: boolean;
+    hideCamera: boolean;
+    muteAudio: boolean;
 };
 
 export type TabData = {

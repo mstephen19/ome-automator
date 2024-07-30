@@ -91,7 +91,7 @@ const sendMessages = async () => {
 
     const messagePipeline = raceWithStatus(
         pipeline<string, void>(
-            transforms.transformAllBlocks,
+            (str: string) => transforms.run(str).result,
             sendMessage,
             ifElse(
                 () => i < messageList.length - 1,

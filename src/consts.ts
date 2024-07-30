@@ -2,6 +2,8 @@ import { AddOns, AppData, Config, Message, TabData } from './types';
 
 export const EXTENSION_MANIFEST = chrome.runtime.getManifest();
 
+export const CHROME_WEBSTORE_LINK = 'https://chromewebstore.google.com/detail/kdakicmdgfidhnnfjgomlkoikigebpdf';
+
 export const defaultAppData: AppData = {
     addMessageText: '',
     messageSequenceOpen: false,
@@ -9,6 +11,8 @@ export const defaultAppData: AppData = {
     addOnsOpen: false,
     helpOpen: false,
     theme: 'light',
+    backdropMessageDismissedUnixMs: Date.now(),
+    backdropConfirmation: null,
 };
 
 export const defaultConfig: Config = {
@@ -28,4 +32,8 @@ export const defaultTabData: TabData = {
 
 export const defaultAddOns: AddOns = {
     showLocationInfo: false,
+    hideCamera: false,
+    muteAudio: false,
 };
+
+export const MAX_MESSAGE_SEQUENCE_LENGTH = 75;

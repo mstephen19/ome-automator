@@ -7,6 +7,8 @@ export const ConfigName = ({ name, tip, value, unit }: { name: string; tip: stri
             <InfoIcon sx={{ fontSize: '1rem', cursor: 'pointer' }} />
         </Tooltip>
 
-        <Typography>{`${name}:${value ? ` ${value}` : ''}${unit ? ` ${unit}` : ''}`}</Typography>
+        <Typography>{`${name}:${value !== undefined && value !== null ? ` ${value}` : ''}${
+            unit !== undefined && unit !== null ? ` ${unit}` : ''
+        }`}</Typography>
     </Box>
 );
