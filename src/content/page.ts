@@ -1,5 +1,5 @@
 import { TypedEventTarget } from '../utils';
-import { PageEvent, PageEventDataMap } from './injected/types';
+import { PageCommand, PageCommandDataMap, PageEvent, PageEventDataMap } from './injected/types';
 
 const pageEventList = Object.values(PageEvent);
 
@@ -15,8 +15,12 @@ const pageEventRouter = () => {
         events.dispatchEvent(new CustomEvent(event.data.type as PageEvent, { detail: event.data.data }));
     });
 
+    const command = <Command extends PageCommand>(command: Command, data: PageCommandDataMap[Command]) =>
+        window.postMessage({ type: command, data });
+
     return {
         events,
+        command,
     };
 };
 

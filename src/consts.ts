@@ -28,6 +28,8 @@ export const defaultTabData: TabData = {
 
 export const defaultAddOns: AddOns = {
     showLocationInfo: false,
+    hideCamera: false,
+    muteAudio: false,
 };
 
 export const MAX_MESSAGE_SEQUENCE_LENGTH = 75;

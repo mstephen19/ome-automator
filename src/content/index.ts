@@ -1,4 +1,4 @@
-import { tabDataStore } from '../storage';
+import { addOnsStore, tabDataStore } from '../storage';
 import { messages, tabData, config, addOns } from './cache';
 import { commands } from './commands';
 import { resetToIdle, sequenceLoop } from './sequence';
@@ -8,7 +8,7 @@ import { defaultAddOns, defaultConfig, defaultMessageSequence, defaultTabData } 
 import { elements, Tip } from './elements';
 import { injectScripts } from './injected';
 import { page } from './page';
-import { PageEvent } from './injected/types';
+import { PageCommand, PageEvent } from './injected/types';
 import { getIPDetails, sanitizeIp } from '../utils';
 
 async function main() {
@@ -38,6 +38,12 @@ async function main() {
     await config.init(defaultConfig);
     await tabData.init(defaultTabData);
     await addOns.init(defaultAddOns);
+
+    page.command(PageCommand.SetAddOnConfig, addOns.latest!);
+    addOnsStore.onChange((latest) => {
+        console.log('Change');
+        page.command(PageCommand.SetAddOnConfig, latest);
+    });
 
     const startListener = async ({ detail: tabId }: CustomEvent<number>) => {
         // If the login popup is open or there's an error, do nothing, but still listen for "Start" button clicks.
