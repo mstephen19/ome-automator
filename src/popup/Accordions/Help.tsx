@@ -84,6 +84,10 @@ export const Help = memo(() => {
                             <ListItem>
                                 <ListItemText primary={<code>{'{angry}not happy{/angry}'}</code>} secondary='Try it out!' />
                             </ListItem>
+
+                            <ListItem>
+                                <ListItemText primary={<code>{'{cool}sweet{/cool}'}</code>} secondary='Try it out!' />
+                            </ListItem>
                         </List>
                     </>
                 }

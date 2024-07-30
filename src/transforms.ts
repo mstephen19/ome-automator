@@ -3,108 +3,110 @@ enum Token {
     Reverse = 'rev',
     Happy = 'happy',
     Angry = 'angry',
+    Cool = 'cool',
 }
 
 type TokenMap = {
     transformBlock: (block: string) => string;
 };
 
-const tokenTags = (token: string) => ({ start: `{${token}}`, end: `{/${token}}` });
+const tagChecker = (tokens: string[]) => {
+    const findTagRegexStr = tokens.map((token) => `{\\\/?${token}}`).join('|');
+    const findTagRegex = new RegExp(findTagRegexStr, 'g');
+    const tagRegex = new RegExp(`^(${findTagRegexStr})$`);
 
-const stringHasTag = (str: string, tokens: string[]) => {
-    const tagRegex = new RegExp(tokens.reduce((acc, token, index) => acc + `${index === 0 ? '' : '|'}{\\\/?${token}}`, ''));
-
-    return tagRegex.test(str);
-};
-
-const tokenFromTag = (str: string, tokens: string[]) => {
-    if (!stringHasTag(str, tokens)) return null;
-
-    const tagType = str[1] === '/' ? 'end' : 'start';
+    /**
+     * Whether or not the parsed segment is purely a relevant tag or not.
+     */
+    const segmentIsTag = (segment: string) => tagRegex.test(segment);
 
     return {
-        tagType,
-        token: str.slice(tagType === 'end' ? 2 : 1, str.length - 1),
+        stringHasRelevantTag: (str: string) => findTagRegex.test(str),
+        parseTokenFromTag: (str: string) => {
+            if (!segmentIsTag(str)) return null;
+
+            const tagType: 'start' | 'end' = str[1] === '/' ? 'end' : 'start';
+            const token = str.slice(tagType === 'end' ? 2 : 1, str.length - 1);
+
+            return { tagType, token };
+        },
+        segmentIsTag,
     };
 };
 
 /**
- * Number of times a substring appears in a string (case insensitive).
+ * Returns a {@link RegExp} that matches for all spaces surrounding start/end tokens in a string.
+ *
+ * For example: |{span}|hello|{/span}|
  */
-const matchesInString = (key: string, str: string) => {
-    const keyRegex = new RegExp(key);
-    return str.match(keyRegex)?.length ?? 0;
+const tokenRegex = (tokens: Record<string, TokenMap>) => {
+    return new RegExp(
+        Object.keys(tokens).reduce(
+            // Split on the spaces surrounding {token} and {/token}
+            (final, token, index) =>
+                final + `${index === 0 ? '' : '|'}(?={${token}})|(?={\\\/${token}})|(?<={${token}})|(?<={\\\/${token}})`,
+            ''
+        )
+    );
 };
 
 /**
- * Parse custom {block}blocks{/block} within a string & transform the content between tags..
+ * Parse custom {block}blocks{/block} within a string & transform the content between tags.
+ *
+ * **Token:** E.g. "spin"
+ *
+ * **Tag:** E.g. "{spin}", "{/spin}"
+ *
+ * **Input:** E.g. "Hello{spin} there|, friend| my fellow human{/spin}!"
+ *
+ * **Segment:** E.g. "Hello", "{spin}", " there|, friend| my fellow human", "{/spin}", "!"
  */
 export const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(tokens: Tokens) => {
-    const tokenList = Object.keys(tokens);
+    const tags = tagChecker(Object.keys(tokens));
 
-    const validateAllBlocks = (input: string) => {
-        return Object.keys(tokens).reduce(
-            (acc, token) => {
-                const { start, end } = tokenTags(token);
+    const splitRegex = tokenRegex(tokens);
 
-                const tokenOk = matchesInString(start, input) === matchesInString(end, input);
-
-                acc.byToken[token as keyof Tokens] = tokenOk;
-                // If any tokens failed, overall ok status is false
-                if (!tokenOk) acc.ok = false;
-
-                return acc;
-            },
-            { ok: true, byToken: {} } as {
-                ok: boolean;
-                byToken: { [K in keyof Tokens]: boolean };
-            }
-        );
-    };
-    const transformAllBlocks = (input: string) => {
-        // Don't transform non-token inputs at all
-        if (!stringHasTag(input, tokenList) || !validateAllBlocks(input)) input;
-
-        const splitRegex = new RegExp(
-            Object.keys(tokens).reduce(
-                // Split on the spaces surrounding {token} and {/token}
-                (final, token, index) =>
-                    final + `${index === 0 ? '' : '|'}(?={${token}})|(?={\\\/${token}})|(?<={${token}})|(?<={\\\/${token}})`,
-                ''
-            )
-        );
-
-        const matches = input.split(splitRegex);
-        if (!matches?.length) {
-            return input;
-        }
-
-        const { final } = matches.reduce(
+    const run = (input: string) => {
+        const { activeToken, ok, result } = input.split(splitRegex).reduce(
             (acc, segment) => {
-                const parsedToken = tokenFromTag(segment, tokenList);
-
-                if (parsedToken !== null && parsedToken.token in tokens) {
-                    acc.currentToken = parsedToken.tagType === 'start' ? (parsedToken.token as keyof Tokens) : null;
+                const parsedTag = tags.parseTokenFromTag(segment);
+                // If it's not a tag, transform (if in an active token) and add to the result.
+                if (!parsedTag) {
+                    acc.result += acc.activeToken === null ? segment : tokens[acc.activeToken]?.transformBlock(segment) ?? segment;
                     return acc;
                 }
 
-                const transformed = acc.currentToken === null ? segment : tokens[acc.currentToken].transformBlock(segment);
-                acc.final += transformed;
+                // If it's a tag
+
+                // Token becomes "active" once a start token is reached
+                if (parsedTag.tagType === 'start') {
+                    if (acc.activeToken === null) acc.activeToken = parsedTag.token;
+                    // As long as there isn't already a start token.
+                    else acc.ok = false;
+                }
+
+                if (parsedTag.tagType === 'end') {
+                    // If there is no active token, or the active token isn't the found end token,
+                    // unexpected token.
+                    if (acc.activeToken === null || acc.activeToken !== parsedTag.token) acc.ok = false;
+                    else acc.activeToken = null;
+                }
 
                 return acc;
             },
-            { final: '', currentToken: null as keyof Tokens | null }
+            { activeToken: null as string | null, ok: true, result: '' }
         );
 
-        return final;
+        return { ok: ok && !activeToken, result };
     };
 
-    return { validateAllBlocks, transformAllBlocks };
+    return { run };
 };
 
 export const transforms = stringSyntaxBlocks({
     [Token.Happy]: { transformBlock: (block: string) => `✿🌼 😄 ${block} ☮️🌈 🌼✿` },
     [Token.Angry]: { transformBlock: (block: string) => `😡😡 ${block.toUpperCase()}!!!! 😡` },
+    [Token.Cool]: { transformBlock: (block: string) => `😤 Yo, ${block} 😎` },
     [Token.Reverse]: { transformBlock: (block: string) => block.split('').reduceRight((acc, char) => acc + char, '') },
     [Token.Spintax]: {
         transformBlock: (block) => {

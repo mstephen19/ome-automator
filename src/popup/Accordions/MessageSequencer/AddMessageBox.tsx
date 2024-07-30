@@ -32,14 +32,12 @@ export const AddMessageBox = () => {
         const content = sanitize(unsanitized);
 
         // If tags are detected in the string (e.g. {spin}{/spin}), runs validation.
-        const { ok, byToken } = transforms.validateAllBlocks(content);
-        if (!ok) {
-            const tokensWithErrors = Object.entries(byToken).reduce<string[]>((acc, [token, tokenOk]) => {
-                if (!tokenOk) acc.push(token);
-                return acc;
-            }, []);
+        const ok = transforms.run(content).ok;
 
-            setValidationError(`Syntax error with the following token(s): ${tokensWithErrors.join(', ')}`);
+        console.log(ok);
+
+        if (!ok) {
+            setValidationError(`Syntax error!`);
             setLoading(false);
             return;
         }
