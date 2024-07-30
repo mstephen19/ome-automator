@@ -3,6 +3,7 @@ enum Token {
     Reverse = 'rev',
     Happy = 'happy',
     Angry = 'angry',
+    Cool = 'cool',
 }
 
 type TokenMap = {
@@ -105,6 +106,7 @@ export const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(toke
 export const transforms = stringSyntaxBlocks({
     [Token.Happy]: { transformBlock: (block: string) => `✿🌼 😄 ${block} ☮️🌈 🌼✿` },
     [Token.Angry]: { transformBlock: (block: string) => `😡😡 ${block.toUpperCase()}!!!! 😡` },
+    [Token.Cool]: { transformBlock: (block: string) => `😤 Yo, ${block} 😎` },
     [Token.Reverse]: { transformBlock: (block: string) => block.split('').reduceRight((acc, char) => acc + char, '') },
     [Token.Spintax]: {
         transformBlock: (block) => {
