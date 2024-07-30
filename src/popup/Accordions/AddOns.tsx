@@ -24,6 +24,24 @@ export const AddOns = () => {
                     label={addOns.showLocationInfo ? 'On' : 'Off'}
                 />
             </Box>
+
+            <Box display='flex' gap='10px'>
+                <ConfigName name='Hide camera' tip="Don't send your camera's video stream to connections." />
+
+                <FormControlLabel
+                    control={<ConfigSwitch onChange={changeHandler('hideCamera')} checked={addOns.hideCamera} />}
+                    label={addOns.hideCamera ? 'Hidden' : 'Off'}
+                />
+            </Box>
+
+            <Box display='flex' gap='10px'>
+                <ConfigName name='Mute microphone' tip="Don't send your microphone's audio stream to connections." />
+
+                <FormControlLabel
+                    control={<ConfigSwitch onChange={changeHandler('muteAudio')} checked={addOns.muteAudio} />}
+                    label={addOns.muteAudio ? 'Muted' : 'Off'}
+                />
+            </Box>
         </Box>
     );
 };

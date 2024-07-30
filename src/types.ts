@@ -37,6 +37,8 @@ export type AppData = {
 
 export type AddOns = {
     showLocationInfo: boolean;
+    hideCamera: boolean;
+    muteAudio: boolean;
 };
 
 export type TabData = {

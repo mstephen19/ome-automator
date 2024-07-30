@@ -28,4 +28,6 @@ export const defaultTabData: TabData = {
 
 export const defaultAddOns: AddOns = {
     showLocationInfo: false,
+    hideCamera: false,
+    muteAudio: false,
 };
