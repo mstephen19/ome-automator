@@ -9,10 +9,6 @@ type TokenMap = {
     transformBlock: (block: string) => string;
 };
 
-const escapeRegex = (str: string) => str.replace(/[.*+?^$()|[\]\\]/g, '$&');
-
-const unescapeRegex = (str: string) => str.replace(/\\([.*+?^$()|[\]\\])/g, '$1');
-
 const tagChecker = (tokens: string[]) => {
     const findTagRegexStr = tokens.map((token) => `{\\\/?${token}}`).join('|');
     const findTagRegex = new RegExp(findTagRegexStr, 'g');
@@ -70,9 +66,7 @@ export const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(toke
     const splitRegex = tokenRegex(tokens);
 
     const run = (input: string) => {
-        const escaped = escapeRegex(input);
-
-        const { ok, result } = escaped.split(splitRegex).reduce(
+        const { activeToken, ok, result } = input.split(splitRegex).reduce(
             (acc, segment) => {
                 const parsedTag = tags.parseTokenFromTag(segment);
                 // If it's not a tag, transform (if in an active token) and add to the result.
@@ -102,7 +96,7 @@ export const stringSyntaxBlocks = <Tokens extends Record<string, TokenMap>>(toke
             { activeToken: null as string | null, ok: true, result: '' }
         );
 
-        return { ok, result: unescapeRegex(result) };
+        return { ok: ok && !activeToken, result };
     };
 
     return { run };
