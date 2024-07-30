@@ -57,7 +57,7 @@ export const MessageList = () => {
 
             {!messages.length && (
                 <ListItem>
-                    <ListItemText sx={{ textAlign: 'center' }}>Your message sequence is empty.</ListItemText>
+                    <ListItemText sx={{ textAlign: 'center' }} primary='Your message sequence is empty.' />
                 </ListItem>
             )}
         </List>

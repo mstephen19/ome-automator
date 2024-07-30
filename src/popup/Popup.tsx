@@ -6,6 +6,7 @@ import { AppDataProvider } from './context/AppDataProvider';
 import { TabProvider } from './context/TabProvider';
 import { ThemeProvider } from './context/ThemeProvider';
 import { TopBar } from './TopBar';
+import { BackdropMessage } from './BackdropMessage';
 
 const AppWrapper = styled(Box)({
     height: '500px',
@@ -27,6 +28,12 @@ const Popup = () => {
         <AppDataProvider>
             <ThemeProvider>
                 <AppWrapper>
+                    <BackdropMessage
+                        // 10 mins
+                        displayAfter={60_000 * 10}
+                        confirmationId='rateTheExtension'
+                    />
+
                     <TopBar />
 
                     <AppContainer>
