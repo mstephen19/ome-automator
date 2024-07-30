@@ -9,29 +9,28 @@ describe('String Syntax Blocks', () => {
 
     describe('Validate', () => {
         it('Should pass on valid syntax', () => {
-            const { ok, byToken } = blocks.validateAllBlocks('{test}testing{/test}{test2}hello{/test2}');
+            const { ok } = blocks.run('{test}testing{/test}{test2}hello{/test2}');
 
             expect(ok).toBe(true);
-            Object.values(byToken).forEach((passed) => expect(passed).toBe(true));
         });
 
-        it('Should not fail on invalid syntax with irrelevant tokens', () => {
-            const { ok, byToken } = blocks.validateAllBlocks('{irel}testing{irel}{irel}{test3}hello{TEST}');
+        it('Should pass on invalid syntax with irrelevant tokens', () => {
+            const { ok } = blocks.run('{irel}testing{irel}{irel}{test3}hello{TEST}');
 
             expect(ok).toBe(true);
-            Object.values(byToken).forEach((passed) => expect(passed).toBe(true));
         });
 
-        it.each(['{test}{test}{test2}{/test2}', '{test}some{/test}text{test}', '{/test}123{test} testing {/test}'])(
-            'Should fail on invalid syntax with relevant tokens',
-            () => {
-                const { ok, byToken } = blocks.validateAllBlocks('{test}{test}{test2}{/test2}');
+        it.each([
+            '{test}{test}{test2}{/test2}',
+            '{test}some{/test}text{test}',
+            '{/test}123{test} testing {/test}',
+            '{/test}hello{test}',
+            '{test}{/test}{test}{/test}{test}{/test}{test}',
+        ])('Should fail on invalid syntax with relevant tokens', () => {
+            const { ok } = blocks.run('{test}{test}{test2}{/test2}');
 
-                expect(ok).toBe(false);
-                expect(byToken.test).toBe(false);
-                expect(byToken.test2).toBe(true);
-            }
-        );
+            expect(ok).toBe(false);
+        });
     });
 
     describe('Transform Blocks', () => {
@@ -41,7 +40,7 @@ describe('String Syntax Blocks', () => {
             { input: '{test}hello{/test}{test2}hello{/test2}', output: '1231234' },
             { input: '{test}hello{/test}{test2}hello{/test2}{invalid}x{/invalid}', output: '1231234{invalid}x{/invalid}' },
         ])('Should transform blocks correctly', ({ input, output }) => {
-            expect(blocks.transformAllBlocks(input)).toBe(output);
+            expect(blocks.run(input).result).toBe(output);
         });
     });
 });
