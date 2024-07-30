@@ -21,7 +21,7 @@ export const AccordionItem = ({
     maxHeight,
     children,
 }: {
-    dataKey: Exclude<keyof AppData, 'theme' | 'addMessageText'>;
+    dataKey: Exclude<keyof AppData, 'theme' | 'addMessageText' | 'backdropMessageDismissedUnixMs' | 'backdropConfirmation'>;
     title: string;
     chip?: string;
     chipColor?: ChipProps['color'];
