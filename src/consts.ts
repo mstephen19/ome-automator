@@ -30,4 +30,4 @@ export const defaultAddOns: AddOns = {
     showLocationInfo: false,
 };
 
-export const MAX_MESSAGE_SEQUENCE_LENGTH = 5;
+export const MAX_MESSAGE_SEQUENCE_LENGTH = 75;
