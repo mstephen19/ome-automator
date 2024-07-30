@@ -61,11 +61,13 @@ export const AddMessageBox = () => {
             label='Message Content'
             placeholder='Hello, how are you?'
             onKeyDown={(e) => {
+                if (!appData.addMessageText.trim()) return;
+
                 // Allow pressing Enter + Shift to create new lines.
-                if (!loading && e.key === 'Enter' && !e.shiftKey && appData.addMessageText.trim()) {
+                if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
 
-                    handleAddMessage(appData.addMessageText);
+                    if (!loading) handleAddMessage(appData.addMessageText);
                 }
             }}
             value={inputText}
