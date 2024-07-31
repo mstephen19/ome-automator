@@ -34,6 +34,11 @@ export const defaultAddOns: AddOns = {
     showLocationInfo: false,
     hideCamera: false,
     muteAudio: false,
+    darkMode: false,
 };
 
 export const MAX_MESSAGE_SEQUENCE_LENGTH = 75;
+
+export const enum CSSOverrideClass {
+    DarkTheme = 'dark-theme',
+}
