@@ -32,11 +32,7 @@ export const AddMessageBox = () => {
         const content = sanitize(unsanitized);
 
         // If tags are detected in the string (e.g. {spin}{/spin}), runs validation.
-        const ok = transforms.run(content).ok;
-
-        console.log(ok);
-
-        if (!ok) {
+        if (!transforms.run(content).ok) {
             setValidationError(`Syntax error!`);
             setLoading(false);
             return;

@@ -1,5 +1,5 @@
 import { IconButton, ListItem, ListItemProps, ListItemText, Tooltip, styled } from '@mui/material';
-import { useState, useContext } from 'react';
+import { useState, useContext, useRef, useEffect } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditOffIcon from '@mui/icons-material/EditOff';
 import { messageStore } from '../../../storage';
@@ -8,6 +8,7 @@ import { MessageSequenceContext } from '../../context/MessageSequenceProvider';
 
 import type { Message } from '../../../types';
 import { TabDataContext } from '../../context/TabProvider';
+import { transforms } from '../../../transforms';
 
 const MessageListItem = styled(ListItem)({
     display: 'flex',
@@ -20,12 +21,22 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
 
     const messages = useContext(MessageSequenceContext);
     const [editing, setEditing] = useState(false);
+    const [validationError, setValidationError] = useState('');
+
     const [loading, setLoading] = useState(false);
 
     /**
      * Optionally pass a replacement {@link Message} to delete & replace.
      */
-    const handleUpdate = async (updated?: Partial<Message>) => {
+    const handleUpdate = async (updated?: string) => {
+        if (updated && !transforms.run(updated).ok) {
+            setValidationError('Syntax error!');
+            return;
+        }
+
+        setValidationError('');
+        setEditing(false);
+
         const index = messages.findIndex(({ id }) => id === message.id);
         if (index === -1) return;
 
@@ -34,7 +45,7 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
         const clone = [...messages];
 
         // Replace the current message item with the updated one
-        if (updated) clone.splice(index, 1, { ...clone[index], ...updated });
+        if (updated) clone.splice(index, 1, { ...clone[index], content: sanitize(updated) });
         // Or remove the item entirely
         else clone.splice(index, 1);
 
@@ -44,35 +55,46 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
         setLoading(false);
     };
 
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const target = contentRef.current?.querySelector('.MuiListItemText-primary');
+
+        if (editing && target && document.activeElement !== target) {
+            (target as HTMLParagraphElement).focus();
+            moveCursorToEnd(target);
+        }
+    }, [editing]);
+
     return (
         <MessageListItem {...props} selected={editing}>
             <ListItemText
                 primary={message.content}
+                secondary={validationError}
                 onKeyDown={(e) => {
-                    const editedText = (e.target as HTMLSpanElement).textContent || '';
+                    const editedText = (e.target as HTMLParagraphElement).textContent || '';
                     if (!editing || !editedText.trim()) return;
 
                     // Enter + Shift for new lines
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        setEditing(false);
 
-                        handleUpdate({ content: sanitize(editedText) });
+                        handleUpdate(editedText);
                     }
                 }}
-                contentEditable={editing}
+                primaryTypographyProps={{
+                    contentEditable: editing,
+                }}
+                secondaryTypographyProps={{
+                    color: 'error',
+                }}
                 // Unable to double-click to edit during loading
                 onDoubleClick={() => {
                     if (!loading) {
                         setEditing(true);
                     }
                 }}
-                ref={(elem: HTMLDivElement) => {
-                    if (editing && elem && document.activeElement !== elem) {
-                        elem.focus();
-                        moveCursorToEnd(elem);
-                    }
-                }}
+                ref={contentRef}
                 sx={{
                     flex: 1,
                     wordWrap: 'break-word',
@@ -82,9 +104,16 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
             />
 
             <Tooltip title={editing ? 'Cancel' : 'Delete'} arrow>
-                <span>
+                <span style={{ alignSelf: 'start' }}>
                     {editing ? (
-                        <IconButton sx={{ alignSelf: 'start' }} onClick={() => setEditing(false)}>
+                        <IconButton
+                            onClick={() => {
+                                setEditing(false);
+                                setValidationError('');
+
+                                const target = contentRef.current?.querySelector('.MuiListItemText-primary');
+                                if (target) target.textContent = message.content;
+                            }}>
                             <EditOffIcon />
                         </IconButton>
                     ) : (
@@ -92,7 +121,6 @@ export const MessageItem = ({ message, ...props }: { message: Message } & ListIt
                             // ? Disallow deleting the last message in the sequence realtime if
                             // ? it's the last one.
                             disabled={loading || (running && messages.length === 1)}
-                            sx={{ alignSelf: 'start' }}
                             onClick={() => handleUpdate()}>
                             <DeleteIcon />
                         </IconButton>
