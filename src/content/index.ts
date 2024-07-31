@@ -1,10 +1,11 @@
+import './overrides.css';
 import { addOnsStore, tabDataStore } from '../storage';
 import { messages, tabData, config, addOns } from './cache';
 import { commands } from './commands';
 import { resetToIdle, sequenceLoop } from './sequence';
 import { Command } from '../types';
 import { status } from './status';
-import { defaultAddOns, defaultConfig, defaultMessageSequence, defaultTabData } from '../consts';
+import { CSSOverrideClass, defaultAddOns, defaultConfig, defaultMessageSequence, defaultTabData } from '../consts';
 import { elements, Tip } from './elements';
 import { injectScripts } from './injected';
 import { page } from './page';
@@ -40,9 +41,10 @@ async function main() {
     await addOns.init(defaultAddOns);
 
     page.command(PageCommand.SetAddOnConfig, addOns.latest!);
+    document.body.classList[addOns.latest!.darkMode ? 'add' : 'remove'](CSSOverrideClass.DarkTheme);
     addOnsStore.onChange((latest) => {
-        console.log('Change');
         page.command(PageCommand.SetAddOnConfig, latest);
+        document.body.classList[latest.darkMode ? 'add' : 'remove'](CSSOverrideClass.DarkTheme);
     });
 
     const startListener = async ({ detail: tabId }: CustomEvent<number>) => {
