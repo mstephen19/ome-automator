@@ -9,7 +9,7 @@ export const enum Status {
 }
 
 export const tipStatusMap: Record<string, Status> = {
-    rules_agreement_default: Status.Idle,
+    rules: Status.Idle,
     searching: Status.Searching,
     connection: Status.Connected,
 };

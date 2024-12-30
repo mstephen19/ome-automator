@@ -138,10 +138,7 @@ export const Help = memo(() => {
                 subheader='Github is the place!'
                 content={
                     <Typography>
-                        Submit any bug reports or feature requests{' '}
-                        <Link href='https://github.com/mstephen19/ome-automator' target='_blank'>
-                            on Github
-                        </Link>
+                        Submit any bug reports or feature requests <Link href='https://github.com/mstephen19/ome-automator'>on Github</Link>
                         .
                     </Typography>
                 }
