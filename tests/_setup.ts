@@ -42,7 +42,5 @@ vi.stubGlobal('chrome', {
 });
 
 vi.mock('../elements', () => ({
-    elements: {
-        tip: () => ({ dataset: { tr: 'rules_agreement_default' } }),
-    },
+    elements: { tip: () => ({ dataset: { tr: 'rules_agreement_default' } }) },
 }));
